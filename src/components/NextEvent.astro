@@ -1,5 +1,5 @@
 ---
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { formatEventDate, relativeDayLabel } from '../lib/events';
 
 type NextEventRow = {
@@ -14,6 +14,8 @@ type NextEventRow = {
 let event: NextEventRow | null = null;
 
 try {
+  if (!isSupabaseConfigured) throw new Error('Supabase sin configurar');
+
   const { data } = await supabase
     .from('events')
     .select('id, title, artist, event_date, image_url, ticket_info')

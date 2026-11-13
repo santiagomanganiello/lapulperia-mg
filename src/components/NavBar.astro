@@ -69,7 +69,7 @@ const currentPath = Astro.url.pathname;
     const menu = document.querySelector('[data-menu]');
 
     if (toggle && menu) {
-        const setOpen = (open) => {
+        const setOpen = (open: boolean) => {
             toggle.setAttribute('aria-expanded', String(open));
             toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
             menu.classList.toggle('hidden', !open);

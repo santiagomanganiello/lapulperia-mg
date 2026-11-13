@@ -12,6 +12,16 @@ const inputClass =
         <p class="text-xl text-[#FBE9A5]/70">Verificando sesión…</p>
     </div>
 
+    <!-- Configuración incompleta: se muestra en lugar del panel -->
+    <div data-view="config" class="hidden flex-col items-center justify-center gap-4 py-16 text-center">
+        <span class="text-5xl" aria-hidden="true">⚙️</span>
+        <h1 class="text-3xl sm:text-4xl">Falta configurar Supabase</h1>
+        <p data-config-error class="max-w-xl rounded-lg border border-red-400/60 bg-red-950/40 px-4 py-3 text-left text-lg text-red-200"></p>
+        <a href="/" class="rounded-lg border border-[#B45427]/60 px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#8A131F]">
+            Volver al sitio
+        </a>
+    </div>
+
     <!-- Panel (recién se muestra cuando hay sesión activa) -->
     <section data-view="content" class="hidden">
         <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
@@ -19,13 +29,22 @@ const inputClass =
                 <h1 class="text-3xl sm:text-4xl">Eventos</h1>
                 <p data-count class="text-lg text-[#FBE9A5]/70"></p>
             </div>
-            <button
-                type="button"
-                data-new
-                class="rounded-lg bg-[#31572A] px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#3f6b3f]"
-            >
-                + Nuevo evento
-            </button>
+            <div class="flex flex-wrap gap-3">
+                <button
+                    type="button"
+                    data-export
+                    class="rounded-lg border border-[#B45427]/60 px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#8A131F]"
+                >
+                    Exportar CSV
+                </button>
+                <button
+                    type="button"
+                    data-new
+                    class="rounded-lg bg-[#31572A] px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#3f6b3f]"
+                >
+                    + Nuevo evento
+                </button>
+            </div>
         </div>
 
         <p
@@ -42,7 +61,7 @@ const inputClass =
     </section>
 
     <!-- Modal para crear / editar un evento -->
-    <dialog data-dialog class="w-[calc(100%)] m-auto self-center max-w-lg rounded-2xl border border-[#B45427] bg-[#770a15] p-3 text-[#FBE9A5]">
+    <dialog data-dialog class="m-auto w-[calc(100%-2rem)] max-w-lg self-center rounded-2xl border border-[#B45427] bg-[#770a15] p-3 text-[#FBE9A5]">
         <div class="rounded-xl">
             <div class="flex items-center justify-between border-b border-[#B45427]/40 px-4 py-3">
                 <h2 data-form-title class="text-2xl">Nuevo evento</h2>
@@ -113,8 +132,10 @@ const inputClass =
                         class="mt-2 w-full text-lg text-[#FBE9A5]/80 file:mr-3 file:rounded-lg file:border-0 file:bg-[#31572A] file:px-3 file:py-2 file:text-[#FBE9A5] file:hover:bg-[#3f6b3f]"
                     />
                     <p class="mt-1 text-base text-[#FBE9A5]/60">
-                        Podés subir una imagen o pegar una URL. Si subís una imagen, se usa esa.
+                        Podés subir una imagen o pegar una URL. Si subís una imagen, se usa esa. La foto se optimiza
+                        sola antes de subir (máximo 1600 px de ancho, formato WebP).
                     </p>
+                    <p data-flyer-info class="mt-1 hidden text-base text-[#FBE9A5]/80" role="status"></p>
                 </div>
 
                 <div>
@@ -198,6 +219,13 @@ const inputClass =
                 </button>
                 <button
                     type="button"
+                    data-t-duplicate
+                    class="rounded-lg border border-[#B45427]/60 px-3 py-1.5 text-base transition-colors duration-300 hover:bg-[#8A131F]"
+                >
+                    Duplicar
+                </button>
+                <button
+                    type="button"
                     data-t-delete
                     class="rounded-lg border border-red-400/50 px-3 py-1.5 text-base text-red-200 transition-colors duration-300 hover:bg-red-950/50"
                 >
@@ -206,6 +234,34 @@ const inputClass =
             </div>
         </li>
     </template>
+
+    <!-- Confirmación para borrar (reemplaza al confirm() del navegador) -->
+    <dialog
+        data-confirm
+        class="w-[calc(100%-2rem)] max-w-md self-center rounded-2xl border border-red-400/60 bg-[#770a15] p-6 text-[#FBE9A5]"
+    >
+        <h2 class="text-2xl">Borrar evento</h2>
+        <p class="mt-2 text-lg text-[#FBE9A5]/80">
+            ¿Seguro que querés borrar «<span data-confirm-title class="font-bold"></span>»? Esta acción no se puede
+            deshacer.
+        </p>
+        <div class="mt-6 flex justify-end gap-3">
+            <button
+                type="button"
+                data-confirm-cancel
+                class="rounded-lg border border-[#B45427]/60 px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#8A131F]"
+            >
+                Cancelar
+            </button>
+            <button
+                type="button"
+                data-confirm-ok
+                class="rounded-lg border border-red-400/60 bg-red-950/60 px-5 py-2.5 text-xl text-red-100 transition-colors duration-300 hover:bg-red-900 disabled:opacity-60"
+            >
+                Borrar
+            </button>
+        </div>
+    </dialog>
 </AdminLayout>
 
 <style>
@@ -215,7 +271,7 @@ const inputClass =
 </style>
 
 <script>
-    import { supabase } from '../../lib/supabase';
+    import { supabase, isSupabaseConfigured, supabaseConfigError } from '../../lib/supabase';
 
     type EventRow = {
         id: string;
@@ -242,6 +298,8 @@ const inputClass =
     // Referencias a las vistas
     const loadingView = $('[data-view="loading"]');
     const contentView = $('[data-view="content"]');
+    const configView = $('[data-view="config"]');
+    const configError = $('[data-config-error]');
     const eventsList = $('[data-events]');
     const emptyMessage = $('[data-empty]');
     const countText = $('[data-count]');
@@ -268,7 +326,14 @@ const inputClass =
         published: $<HTMLInputElement>('input[data-field="published"]'),
     };
     const flyerPreview = $<HTMLImageElement>('img[data-flyer-preview]');
+    const flyerInfo = $<HTMLElement>('[data-flyer-info]');
     const cardTemplate = $<HTMLTemplateElement>('template[data-event-card]');
+
+    // Confirmación de borrado
+    const confirmDialog = $<HTMLDialogElement>('dialog[data-confirm]');
+    const confirmTitle = $('[data-confirm-title]');
+    const confirmOk = $<HTMLButtonElement>('button[data-confirm-ok]');
+    const confirmCancel = $<HTMLButtonElement>('button[data-confirm-cancel]');
 
     // ---------- Mensajes de estado ----------
 
@@ -312,6 +377,74 @@ const inputClass =
         return `${fecha} · ${hora} hs`;
     }
 
+    // ---------- Optimización del flyer ----------
+
+    const MAX_FLYER_SIDE = 1600;
+    const WEBP_QUALITY = 0.82;
+
+    function formatBytes(bytes: number): string {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+        return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+    }
+
+    function showFlyerInfo(message: string) {
+        flyerInfo.textContent = message;
+        flyerInfo.classList.remove('hidden');
+    }
+
+    /**
+     * Redimensiona a 1600 px y convierte a WebP en el navegador antes de subir.
+     * Así una foto de celular de 10 MB no termina pesando eso en la portada.
+     */
+    async function optimizeFlyer(file: File): Promise<File> {
+        // SVG y GIF se suben tal cual: el canvas los rasterizaría o perdería la animación.
+        if (!file.type.startsWith('image/') || file.type === 'image/svg+xml' || file.type === 'image/gif') {
+            return file;
+        }
+
+        let bitmap: ImageBitmap;
+        try {
+            bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+        } catch {
+            throw new Error(
+                'No pudimos leer la imagen. Si es una foto de iPhone en formato HEIC, ' +
+                    'convertila a JPG o elegí «Más compatible» al sacarla.'
+            );
+        }
+
+        const scale = Math.min(1, MAX_FLYER_SIDE / Math.max(bitmap.width, bitmap.height));
+        const width = Math.round(bitmap.width * scale);
+        const height = Math.round(bitmap.height * scale);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const context = canvas.getContext('2d');
+        if (!context) {
+            bitmap.close();
+            return file;
+        }
+
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = 'high';
+        context.drawImage(bitmap, 0, 0, width, height);
+        bitmap.close();
+
+        const blob = await new Promise<Blob | null>((resolve) => {
+            canvas.toBlob(resolve, 'image/webp', WEBP_QUALITY);
+        });
+
+        if (!blob) return file;
+
+        // Si el original ya era chico y el WebP pesa más, no vale la pena re-codificar.
+        if (scale === 1 && blob.size >= file.size) return file;
+
+        const baseName = file.name.replace(/\.[^.]+$/, '') || 'flyer';
+        return new File([blob], `${baseName}.webp`, { type: 'image/webp' });
+    }
+
     // ---------- Flyers (Supabase Storage) ----------
 
     async function uploadFlyer(file: File): Promise<string> {
@@ -337,6 +470,12 @@ const inputClass =
         } catch {
             // No es crítico si falla.
         }
+    }
+
+    // Un evento duplicado comparte el flyer: no hay que borrarlo mientras otro lo use.
+    function isFlyerShared(url: string | null | undefined, excludeId: string): boolean {
+        if (!url) return false;
+        return events.some((ev) => ev.id !== excludeId && ev.image_url === url);
     }
 
     function setFlyerPreview(url: string | null, file: File | null) {
@@ -408,6 +547,9 @@ const inputClass =
 
             toggle.addEventListener('click', () => void togglePublished(ev));
             $<HTMLButtonElement>('button[data-t-edit]', card).addEventListener('click', () => openDialog(ev));
+            $<HTMLButtonElement>('button[data-t-duplicate]', card).addEventListener('click', () =>
+                openDialog(ev, 'duplicate')
+            );
             $<HTMLButtonElement>('button[data-t-delete]', card).addEventListener('click', () => void deleteEvent(ev));
 
             eventsList.append(card);
@@ -422,6 +564,38 @@ const inputClass =
 
     // ---------- Acciones ----------
 
+    function askDelete(title: string): Promise<boolean> {
+        confirmTitle.textContent = title;
+        confirmDialog.returnValue = '';
+        confirmDialog.showModal();
+
+        return new Promise((resolve) => {
+            const onClose = () => {
+                confirmDialog.removeEventListener('close', onClose);
+                resolve(confirmDialog.returnValue === 'confirm');
+            };
+            confirmDialog.addEventListener('close', onClose);
+        });
+    }
+
+    confirmCancel.addEventListener('click', () => {
+        confirmDialog.returnValue = '';
+        confirmDialog.close();
+    });
+
+    confirmOk.addEventListener('click', () => {
+        confirmDialog.returnValue = 'confirm';
+        confirmDialog.close();
+    });
+
+    // Cerrar al hacer clic en el fondo, como el modal de edición.
+    confirmDialog.addEventListener('click', (event) => {
+        if (event.target === confirmDialog) {
+            confirmDialog.returnValue = '';
+            confirmDialog.close();
+        }
+    });
+
     async function togglePublished(ev: EventRow) {
         const { error } = await supabase.from('events').update({ published: !ev.published }).eq('id', ev.id);
         if (error) {
@@ -434,42 +608,90 @@ const inputClass =
     }
 
     async function deleteEvent(ev: EventRow) {
-        if (!confirm(`¿Borrar el evento «${ev.title}»? Esta acción no se puede deshacer.`)) return;
+        if (!(await askDelete(ev.title))) return;
 
         const { error } = await supabase.from('events').delete().eq('id', ev.id);
         if (error) {
             showStatus(`No se pudo borrar el evento: ${error.message}`, 'error');
             return;
         }
-        await removeFlyer(ev.image_url);
+        if (!isFlyerShared(ev.image_url, ev.id)) await removeFlyer(ev.image_url);
         showStatus('Evento borrado.', 'ok');
         await loadEvents();
     }
 
+    // ---------- Exportar CSV ----------
+
+    function csvCell(value: string): string {
+        return /[",;\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+    }
+
+    function exportCsv() {
+        if (events.length === 0) {
+            showStatus('No hay eventos para exportar todavía.', 'error');
+            return;
+        }
+
+        const header = ['Título', 'Artista', 'Fecha', 'Hora', 'Estado', 'Entradas', 'Descripción', 'Flyer', 'ID'];
+        const rows = events.map((ev) => {
+            const date = new Date(ev.event_date);
+            return [
+                ev.title,
+                ev.artist ?? '',
+                date.toLocaleDateString('es-AR'),
+                date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+                ev.published ? 'Publicado' : 'Borrador',
+                ev.ticket_info ?? '',
+                ev.description ?? '',
+                ev.image_url ?? '',
+                ev.id,
+            ];
+        });
+
+        // BOM + punto y coma: Excel en español abre el archivo directamente en columnas.
+        const csv = '\ufeff' + [header, ...rows].map((row) => row.map(csvCell).join(';')).join('\r\n');
+        const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `eventos-pulperia-${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showStatus(`Se descargaron ${events.length} eventos en CSV.`, 'ok');
+    }
+
+    $('[data-export]').addEventListener('click', exportCsv);
+
     // ---------- Modal ----------
 
-    function openDialog(ev: EventRow | null) {
-        editingId = ev?.id ?? null;
+    type DialogMode = 'new' | 'edit' | 'duplicate';
+
+    function openDialog(ev: EventRow | null, mode: DialogMode = ev ? 'edit' : 'new') {
+        editingId = mode === 'edit' ? ev?.id ?? null : null;
         formError.classList.add('hidden');
+        flyerInfo.classList.add('hidden');
 
-        formTitle.textContent = ev ? 'Editar evento' : 'Nuevo evento';
-        saveButton.textContent = ev ? 'Guardar cambios' : 'Crear evento';
+        formTitle.textContent =
+            mode === 'edit' ? 'Editar evento' : mode === 'duplicate' ? 'Duplicar evento' : 'Nuevo evento';
+        saveButton.textContent = mode === 'edit' ? 'Guardar cambios' : 'Crear evento';
 
-        fields.id.value = ev?.id ?? '';
-        fields.title.value = ev?.title ?? '';
-        fields.artist.value = ev?.artist ?? '';
-        fields.description.value = ev?.description ?? '';
+        const base = mode === 'new' ? null : ev;
 
-        const { date, time } = ev ? eventDateParts(ev.event_date) : { date: '', time: '21:00' };
+        fields.id.value = editingId ?? '';
+        fields.title.value = base ? (mode === 'duplicate' ? `${base.title} (copia)` : base.title) : '';
+        fields.artist.value = base?.artist ?? '';
+        fields.description.value = base?.description ?? '';
+
+        const { date, time } = base ? eventDateParts(base.event_date) : { date: '', time: '21:00' };
         fields.date.value = date;
         fields.time.value = time || '21:00';
 
-        fields.flyerUrl.value = ev?.image_url ?? '';
+        fields.flyerUrl.value = base?.image_url ?? '';
         fields.flyerFile.value = '';
-        fields.ticketInfo.value = ev?.ticket_info ?? '';
-        fields.published.checked = ev?.published ?? false;
+        fields.ticketInfo.value = base?.ticket_info ?? '';
+        // Una copia arranca como borrador para no duplicar algo visible sin querer.
+        fields.published.checked = mode === 'duplicate' ? false : base?.published ?? false;
 
-        setFlyerPreview(ev?.image_url ?? null, null);
+        setFlyerPreview(base?.image_url ?? null, null);
         dialog.showModal();
         fields.title.focus();
     }
@@ -490,10 +712,17 @@ const inputClass =
             fields.flyerUrl.value = '';
         }
         setFlyerPreview(null, file);
+
+        if (file) {
+            showFlyerInfo(`Imagen seleccionada: ${formatBytes(file.size)}. Se optimiza al guardar.`);
+        } else {
+            flyerInfo.classList.add('hidden');
+        }
     });
 
     fields.flyerUrl.addEventListener('change', () => {
         if (fields.flyerFile.files?.length) return;
+        flyerInfo.classList.add('hidden');
         setFlyerPreview(fields.flyerUrl.value.trim() || null, null);
     });
 
@@ -520,15 +749,22 @@ const inputClass =
             return;
         }
 
-        const file = fields.flyerFile.files?.[0] ?? null;
+        const originalFile = fields.flyerFile.files?.[0] ?? null;
         const urlValue = fields.flyerUrl.value.trim() || null;
 
         saveButton.disabled = true;
-        saveButton.textContent = 'Guardando…';
+        saveButton.textContent = originalFile ? 'Optimizando imagen…' : 'Guardando…';
 
         let imageUrl: string | null = urlValue;
-        if (file) {
+        if (originalFile) {
             try {
+                const file = await optimizeFlyer(originalFile);
+                showFlyerInfo(
+                    file === originalFile
+                        ? `Imagen lista: ${formatBytes(file.size)}.`
+                        : `Imagen optimizada: ${formatBytes(originalFile.size)} → ${formatBytes(file.size)}.`
+                );
+                saveButton.textContent = 'Guardando…';
                 imageUrl = await uploadFlyer(file);
             } catch (uploadError) {
                 showFormError(
@@ -570,7 +806,12 @@ const inputClass =
         }
 
         // Si cambió el flyer y el anterior era nuestro, lo borramos de Storage.
-        if (editingId && previousImageUrl && previousImageUrl !== imageUrl) {
+        if (
+            editingId &&
+            previousImageUrl &&
+            previousImageUrl !== imageUrl &&
+            !isFlyerShared(previousImageUrl, editingId)
+        ) {
             await removeFlyer(previousImageUrl);
         }
 
@@ -582,6 +823,14 @@ const inputClass =
     // ---------- Inicio ----------
 
     async function init() {
+        if (!isSupabaseConfigured) {
+            loadingView.classList.add('hidden');
+            configView.classList.add('flex');
+            configView.classList.remove('hidden');
+            configError.textContent = supabaseConfigError ?? 'Supabase no está configurado.';
+            return;
+        }
+
         const { data } = await supabase.auth.getSession();
         if (!data.session) {
             window.location.replace('/admin/login');

@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { SITE } from '../../lib/site';
 
 export const prerender = false;
@@ -25,6 +25,7 @@ export const GET: APIRoute = async ({ params, url }) => {
   const id = params.id;
 
   if (!id) return new Response('Evento no encontrado', { status: 404 });
+  if (!isSupabaseConfigured) return new Response('Agenda no disponible', { status: 503 });
 
   const { data } = await supabase
     .from('events')

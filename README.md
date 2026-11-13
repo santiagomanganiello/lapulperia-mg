@@ -52,6 +52,7 @@ Ejecutar [`supabase-setup.sql`](supabase-setup.sql) en el SQL Editor de Supabase
 |---|---|
 | `npm run dev` | Servidor de desarrollo en `localhost:4321`. |
 | `npm run build` | Build de producción (`.vercel/output`). |
+| `npm run check` | Verificación de tipos (`astro check`). |
 | `npm run astro ...` | CLI de Astro. |
 
 ## Estructura
@@ -69,7 +70,9 @@ supabase-setup.sql   esquema, políticas y bucket
 
 ## Panel de administración
 
-`/admin` permite crear, editar, publicar y borrar eventos, y subir el flyer a Supabase Storage. Se entra con un usuario de Supabase Auth (`/admin/login`).
+`/admin` permite crear, editar, duplicar, publicar/despublicar y borrar eventos, subir flyers (se optimizan en el navegador antes de subirse) y exportar la lista a CSV. Se entra con un usuario de Supabase Auth (`/admin/login`).
+
+Guía paso a paso: [`docs/manual-admin.md`](docs/manual-admin.md).
 
 ## Créditos
 

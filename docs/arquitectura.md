@@ -40,7 +40,7 @@ Las fechas se guardan en UTC y se muestran siempre en `America/Argentina/Buenos_
 
 ## Limitaciones conocidas
 
-- **Flyers sin optimizar**: el admin sube la imagen tal cual y la home la muestra con un `<img>`. Una foto de celular pesada impacta en la portada. Pendiente: comprimir en el navegador antes de subir.
 - **Sin backend para el panel**: la protección es RLS + `noindex`. Es adecuado para este caso, pero no reemplaza una sesión verificada del lado del servidor.
 - **Supabase free** se pausa por inactividad; si el sitio queda sin tráfico una semana, la primera visita puede fallar.
 - **Imágenes fuente**: se guardan a 2400 px; los originales quedan fuera del repo.
+- **Flyers**: se optimizan en el navegador (máx. 1600 px, WebP) antes de subirlos. El panel no valida el peso máximo del bucket; una imagen que el navegador no pueda decodificar (HEIC en algunos casos) muestra un error explicativo.

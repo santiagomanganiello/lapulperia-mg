@@ -51,9 +51,13 @@ const { title = 'Panel de administración · La Pulpería MG', showLogout = fals
 </html>
 
 <script>
-    import { supabase } from '../lib/supabase';
+    import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
-    const logoutButton = document.querySelector('[data-logout]');
+    const logoutButton = document.querySelector<HTMLButtonElement>('[data-logout]');
+
+    if (logoutButton && !isSupabaseConfigured) {
+        logoutButton.classList.add('hidden');
+    }
 
     logoutButton?.addEventListener('click', async () => {
         logoutButton.setAttribute('disabled', '');

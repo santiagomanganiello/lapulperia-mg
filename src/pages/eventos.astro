@@ -1,7 +1,7 @@
 ---
 export const prerender = false;
 
-import { supabase } from "../lib/supabase";
+import { supabase, isSupabaseConfigured, supabaseConfigError } from "../lib/supabase";
 import { formatEventDate, relativeDayLabel } from "../lib/events";
 import Layout from "../layouts/Layout.astro";
 
@@ -16,12 +16,14 @@ type EventRow = {
   published: boolean;
 };
 
-const { data, error } = await supabase
-  .from("events")
-  .select("id, title, artist, description, event_date, image_url, ticket_info, published")
-  .eq("published", true)
-  .gte("event_date", new Date().toISOString())
-  .order("event_date", { ascending: true });
+const { data, error } = isSupabaseConfigured
+  ? await supabase
+      .from("events")
+      .select("id, title, artist, description, event_date, image_url, ticket_info, published")
+      .eq("published", true)
+      .gte("event_date", new Date().toISOString())
+      .order("event_date", { ascending: true })
+  : { data: null, error: { message: supabaseConfigError } };
 
 const events = (data as EventRow[] | null) ?? [];
 
@@ -42,6 +44,9 @@ const eventsWithMeta = events.map((event) => ({
     {error && (
       <p class="mx-auto mb-6 max-w-xl rounded-lg border border-red-400/60 bg-red-950/40 px-4 py-3 text-lg text-red-200">
         No pudimos cargar la agenda en este momento. Probá de nuevo en unos minutos.
+        {import.meta.env.DEV && supabaseConfigError && (
+          <span class="mt-2 block text-base text-red-200/80">{supabaseConfigError}</span>
+        )}
       </p>
     )}
 

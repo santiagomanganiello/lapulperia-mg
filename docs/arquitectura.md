@@ -4,13 +4,13 @@ Documento corto con las decisiones de diseño y sus motivos. El objetivo es que 
 
 ## Renderizado por ruta
 
-| Ruta | Modo | Motivo |
-|---|---|---|
-| `/` | Estático | Es la puerta de entrada; no puede depender de una consulta a la base para responder. |
-| `/carta`, `/fotos`, `/location` | Estático | Contenido versionado en el repo, cambia poco. |
-| `/eventos` | On-demand + ISR 60 s | La agenda cambia seguido y no debe requerir un deploy. |
-| `NextEvent` | Server island | La home queda estática y solo esta tarjeta se renderiza en el servidor, con su propio cache. |
-| `/admin` | Estático (shell) | La sesión y los datos se resuelven en el cliente contra Supabase. |
+| Ruta                            | Modo                 | Motivo                                                                                       |
+| ------------------------------- | -------------------- | -------------------------------------------------------------------------------------------- |
+| `/`                             | Estático             | Es la puerta de entrada; no puede depender de una consulta a la base para responder.         |
+| `/carta`, `/fotos`, `/location` | Estático             | Contenido versionado en el repo, cambia poco.                                                |
+| `/eventos`                      | On-demand + ISR 60 s | La agenda cambia seguido y no debe requerir un deploy.                                       |
+| `NextEvent`                     | Server island        | La home queda estática y solo esta tarjeta se renderiza en el servidor, con su propio cache. |
+| `/admin`                        | Estático (shell)     | La sesión y los datos se resuelven en el cliente contra Supabase.                            |
 
 ## Por qué ISR y no SSR total
 

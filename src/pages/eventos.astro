@@ -1,9 +1,9 @@
 ---
 export const prerender = false;
 
-import { supabase, isSupabaseConfigured, supabaseConfigError } from "../lib/supabase";
-import { formatEventDate, relativeDayLabel } from "../lib/events";
-import Layout from "../layouts/Layout.astro";
+import { supabase, isSupabaseConfigured, supabaseConfigError } from '../lib/supabase';
+import { formatEventDate, relativeDayLabel } from '../lib/events';
+import Layout from '../layouts/Layout.astro';
 
 type EventRow = {
   id: string;
@@ -18,11 +18,11 @@ type EventRow = {
 
 const { data, error } = isSupabaseConfigured
   ? await supabase
-      .from("events")
-      .select("id, title, artist, description, event_date, image_url, ticket_info, published")
-      .eq("published", true)
-      .gte("event_date", new Date().toISOString())
-      .order("event_date", { ascending: true })
+      .from('events')
+      .select('id, title, artist, description, event_date, image_url, ticket_info, published')
+      .eq('published', true)
+      .gte('event_date', new Date().toISOString())
+      .order('event_date', { ascending: true })
   : { data: null, error: { message: supabaseConfigError } };
 
 const events = (data as EventRow[] | null) ?? [];

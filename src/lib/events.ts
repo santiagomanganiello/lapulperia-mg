@@ -56,4 +56,3 @@ export function relativeDayLabel(iso: string, now: Date = new Date()): string | 
   if (diff > 1 && diff <= 6) return `En ${diff} días`;
   return null;
 }
-

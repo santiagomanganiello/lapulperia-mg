@@ -4,8 +4,8 @@ import { Image } from 'astro:assets';
 import Logo from '../assets/pulpe-logo.jpg';
 
 interface Props {
-    title?: string;
-    showLogout?: boolean;
+  title?: string;
+  showLogout?: boolean;
 }
 
 const { title = 'Panel de administración · La Pulpería MG', showLogout = false } = Astro.props;
@@ -13,55 +13,57 @@ const { title = 'Panel de administración · La Pulpería MG', showLogout = fals
 
 <!doctype html>
 <html lang="es">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="generator" content={Astro.generator} />
-        <meta name="robots" content="noindex, nofollow" />
-        <title>{title}</title>
-    </head>
-    <body class="flex min-h-screen flex-col bg-[#8A131F] text-[#FBE9A5]">
-        <header class="flex shrink-0 items-center justify-between gap-4 border-b border-[#B45427]/40 bg-[#770a15] px-4 py-3 sm:px-6">
-            <a href="/" class="flex items-center gap-3" aria-label="Volver al sitio público">
-                <Image
-                    src={Logo}
-                    alt="Logo La Pulpería MG"
-                    class="h-10 w-10 rounded-full border-2 border-[#B45427] object-cover"
-                    width={40}
-                    height={40}
-                />
-                <span class="text-xl sm:text-2xl">La Pulpería MG <span class="text-[#FBE9A5]/60">· Admin</span></span>
-            </a>
-            {showLogout && (
-                <button
-                    type="button"
-                    data-logout
-                    class="rounded-lg bg-[#31572A] px-4 py-2 text-lg transition-colors duration-300 hover:bg-[#3f6b3f] disabled:opacity-60"
-                >
-                    Cerrar sesión
-                </button>
-            )}
-        </header>
-        <main class="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-8 sm:px-6">
-            <slot />
-        </main>
-    </body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+  </head>
+  <body class="flex min-h-screen flex-col bg-[#8A131F] text-[#FBE9A5]">
+    <header class="flex shrink-0 items-center justify-between gap-4 border-b border-[#B45427]/40 bg-[#770a15] px-4 py-3 sm:px-6">
+      <a href="/" class="flex items-center gap-3" aria-label="Volver al sitio público">
+        <Image
+          src={Logo}
+          alt="Logo La Pulpería MG"
+          class="h-10 w-10 rounded-full border-2 border-[#B45427] object-cover"
+          width={40}
+          height={40}
+        />
+        <span class="text-xl sm:text-2xl">
+          La Pulpería MG <span class="text-[#FBE9A5]/60">· Admin</span>
+        </span>
+      </a>
+      {showLogout && (
+        <button
+          type="button"
+          data-logout
+          class="rounded-lg bg-[#31572A] px-4 py-2 text-lg transition-colors duration-300 hover:bg-[#3f6b3f] disabled:opacity-60"
+        >
+          Cerrar sesión
+        </button>
+      )}
+    </header>
+    <main class="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-8 sm:px-6">
+      <slot />
+    </main>
+  </body>
 </html>
 
 <script>
-    import { supabase, isSupabaseConfigured } from '../lib/supabase';
+  import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
-    const logoutButton = document.querySelector<HTMLButtonElement>('[data-logout]');
+  const logoutButton = document.querySelector<HTMLButtonElement>('[data-logout]');
 
-    if (logoutButton && !isSupabaseConfigured) {
-        logoutButton.classList.add('hidden');
-    }
+  if (logoutButton && !isSupabaseConfigured) {
+    logoutButton.classList.add('hidden');
+  }
 
-    logoutButton?.addEventListener('click', async () => {
-        logoutButton.setAttribute('disabled', '');
-        await supabase.auth.signOut();
-        window.location.replace('/admin/login');
-    });
+  logoutButton?.addEventListener('click', async () => {
+    logoutButton.setAttribute('disabled', '');
+    await supabase.auth.signOut();
+    window.location.replace('/admin/login');
+  });
 </script>

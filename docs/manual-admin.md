@@ -36,12 +36,12 @@ El evento aparece en **Eventos** y, si está publicado, en la web pública. La a
 
 Cada evento tiene botones a la derecha:
 
-| Botón | Qué hace |
-|---|---|
-| **Publicar / Despublicar** | Muestra u oculta el evento en la web, sin borrarlo. |
-| **Editar** | Abre el formulario con todos los datos cargados. |
-| **Duplicar** | Crea una copia del evento (queda como **borrador**). Sirve para repetir una noche fija: cambiás la fecha y publicás. |
-| **Borrar** | Elimina el evento y su flyer. Pide confirmación y no se puede deshacer. |
+| Botón                      | Qué hace                                                                                                             |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Publicar / Despublicar** | Muestra u oculta el evento en la web, sin borrarlo.                                                                  |
+| **Editar**                 | Abre el formulario con todos los datos cargados.                                                                     |
+| **Duplicar**               | Crea una copia del evento (queda como **borrador**). Sirve para repetir una noche fija: cambiás la fecha y publicás. |
+| **Borrar**                 | Elimina el evento y su flyer. Pide confirmación y no se puede deshacer.                                              |
 
 Los eventos con fecha pasada se marcan como **Pasado** y dejan de aparecer en la agenda pública automáticamente. No hace falta borrarlos.
 
@@ -51,13 +51,13 @@ El botón **Exportar CSV** descarga todos los eventos (publicados y borradores) 
 
 ## Problemas comunes
 
-| Problema | Solución |
-|---|---|
-| Publiqué un evento y no aparece | Verificá que tenga **Publicado** marcado. La agenda puede tardar hasta 1 minuto en actualizarse. |
-| No puedo entrar | Revisá el email y la contraseña. Si la olvidaste, se resetea desde el panel de Supabase (Authentication → Users). |
-| No sube el flyer | Probá con una imagen JPG o PNG. Si sigue, pegá una URL en el campo de imagen o revisá el bucket `flyers-pulpe` en Supabase. |
-| El sitio no carga o tarda | El plan gratuito de Supabase se pausa por inactividad. Entrá al panel de Supabase y reactivá el proyecto. |
-| Borré un evento sin querer | No se puede recuperar desde el panel. Si tenés un CSV exportado, quedan los datos (no las imágenes). |
+| Problema                        | Solución                                                                                                                    |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Publiqué un evento y no aparece | Verificá que tenga **Publicado** marcado. La agenda puede tardar hasta 1 minuto en actualizarse.                            |
+| No puedo entrar                 | Revisá el email y la contraseña. Si la olvidaste, se resetea desde el panel de Supabase (Authentication → Users).           |
+| No sube el flyer                | Probá con una imagen JPG o PNG. Si sigue, pegá una URL en el campo de imagen o revisá el bucket `flyers-pulpe` en Supabase. |
+| El sitio no carga o tarda       | El plan gratuito de Supabase se pausa por inactividad. Entrá al panel de Supabase y reactivá el proyecto.                   |
+| Borré un evento sin querer      | No se puede recuperar desde el panel. Si tenés un CSV exportado, quedan los datos (no las imágenes).                        |
 
 ## Buenas prácticas
 

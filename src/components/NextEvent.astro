@@ -11,25 +11,27 @@ type NextEventRow = {
   ticket_info: string | null;
 };
 
-let event: NextEventRow | null = null;
+async function fetchNextEvent(): Promise<NextEventRow | null> {
+  try {
+    if (!isSupabaseConfigured) return null;
 
-try {
-  if (!isSupabaseConfigured) throw new Error('Supabase sin configurar');
+    const { data } = await supabase
+      .from('events')
+      .select('id, title, artist, event_date, image_url, ticket_info')
+      .eq('published', true)
+      .gte('event_date', new Date().toISOString())
+      .order('event_date', { ascending: true })
+      .limit(1)
+      .maybeSingle();
 
-  const { data } = await supabase
-    .from('events')
-    .select('id, title, artist, event_date, image_url, ticket_info')
-    .eq('published', true)
-    .gte('event_date', new Date().toISOString())
-    .order('event_date', { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  event = (data as NextEventRow | null) ?? null;
-} catch {
-  // Si Supabase no responde, la home sigue funcionando sin la tarjeta.
-  event = null;
+    return (data as NextEventRow | null) ?? null;
+  } catch {
+    // Si Supabase no responde, la home sigue funcionando sin la tarjeta.
+    return null;
+  }
 }
+
+const event = await fetchNextEvent();
 
 const fecha = event ? formatEventDate(event.event_date) : null;
 const relative = event ? relativeDayLabel(event.event_date) : null;

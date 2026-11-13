@@ -2,844 +2,946 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 
 const inputClass =
-    'w-full rounded-lg border border-[#B45427]/50 bg-[#8A131F] px-3 py-2 text-lg text-[#FBE9A5] placeholder:text-[#FBE9A5]/40 focus:border-[#FBE9A5] focus:outline-none';
+  'w-full rounded-lg border border-[#B45427]/50 bg-[#8A131F] px-3 py-2 text-lg text-[#FBE9A5] placeholder:text-[#FBE9A5]/40 focus:border-[#FBE9A5] focus:outline-none';
 ---
 
 <AdminLayout title="Eventos · La Pulpería MG" showLogout>
-    <!-- Pantalla de carga mientras se verifica la sesión -->
-    <div data-view="loading" class="flex flex-1 flex-col items-center justify-center gap-4 py-24 text-center">
-        <span class="inline-block h-10 w-10 animate-spin rounded-full border-4 border-[#FBE9A5]/30 border-t-[#FBE9A5]"></span>
-        <p class="text-xl text-[#FBE9A5]/70">Verificando sesión…</p>
+  <!-- Pantalla de carga mientras se verifica la sesión -->
+  <div
+    data-view="loading"
+    class="flex flex-1 flex-col items-center justify-center gap-4 py-24 text-center"
+  >
+    <span class="inline-block h-10 w-10 animate-spin rounded-full border-4 border-[#FBE9A5]/30 border-t-[#FBE9A5]"></span>
+    <p class="text-xl text-[#FBE9A5]/70">Verificando sesión…</p>
+  </div>
+
+  <!-- Configuración incompleta: se muestra en lugar del panel -->
+  <div
+    data-view="config"
+    class="hidden flex-col items-center justify-center gap-4 py-16 text-center"
+  >
+    <span class="text-5xl" aria-hidden="true">
+      ⚙️
+    </span>
+    <h1 class="text-3xl sm:text-4xl">Falta configurar Supabase</h1>
+    <p
+      data-config-error
+      class="max-w-xl rounded-lg border border-red-400/60 bg-red-950/40 px-4 py-3 text-left text-lg text-red-200"
+    ></p>
+    <a
+      href="/"
+      class="rounded-lg border border-[#B45427]/60 px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#8A131F]"
+    >
+      Volver al sitio
+    </a>
+  </div>
+
+  <!-- Panel (recién se muestra cuando hay sesión activa) -->
+  <section data-view="content" class="hidden">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl sm:text-4xl">Eventos</h1>
+        <p data-count class="text-lg text-[#FBE9A5]/70"></p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <button
+          type="button"
+          data-export
+          class="rounded-lg border border-[#B45427]/60 px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#8A131F]"
+        >
+          Exportar CSV
+        </button>
+        <button
+          type="button"
+          data-new
+          class="rounded-lg bg-[#31572A] px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#3f6b3f]"
+        >
+          + Nuevo evento
+        </button>
+      </div>
     </div>
 
-    <!-- Configuración incompleta: se muestra en lugar del panel -->
-    <div data-view="config" class="hidden flex-col items-center justify-center gap-4 py-16 text-center">
-        <span class="text-5xl" aria-hidden="true">⚙️</span>
-        <h1 class="text-3xl sm:text-4xl">Falta configurar Supabase</h1>
-        <p data-config-error class="max-w-xl rounded-lg border border-red-400/60 bg-red-950/40 px-4 py-3 text-left text-lg text-red-200"></p>
-        <a href="/" class="rounded-lg border border-[#B45427]/60 px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#8A131F]">
-            Volver al sitio
-        </a>
-    </div>
+    <p
+      data-status
+      class="mb-4 hidden rounded-lg border border-[#31572A] bg-[#31572A]/30 px-4 py-3 text-lg"
+    ></p>
 
-    <!-- Panel (recién se muestra cuando hay sesión activa) -->
-    <section data-view="content" class="hidden">
-        <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-            <div>
-                <h1 class="text-3xl sm:text-4xl">Eventos</h1>
-                <p data-count class="text-lg text-[#FBE9A5]/70"></p>
-            </div>
-            <div class="flex flex-wrap gap-3">
-                <button
-                    type="button"
-                    data-export
-                    class="rounded-lg border border-[#B45427]/60 px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#8A131F]"
-                >
-                    Exportar CSV
-                </button>
-                <button
-                    type="button"
-                    data-new
-                    class="rounded-lg bg-[#31572A] px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#3f6b3f]"
-                >
-                    + Nuevo evento
-                </button>
-            </div>
+    <ul data-events class="flex flex-col gap-4"></ul>
+
+    <p
+      data-empty
+      class="hidden rounded-2xl border border-dashed border-[#B45427]/60 px-6 py-12 text-center text-xl text-[#FBE9A5]/70"
+    >
+      Todavía no hay eventos cargados. Creá el primero con el botón «Nuevo evento».
+    </p>
+  </section>
+
+  <!-- Modal para crear / editar un evento -->
+  <dialog
+    data-dialog
+    class="m-auto w-[calc(100%-2rem)] max-w-lg self-center rounded-2xl border border-[#B45427] bg-[#770a15] p-3 text-[#FBE9A5]"
+  >
+    <div class="rounded-xl">
+      <div class="flex items-center justify-between border-b border-[#B45427]/40 px-4 py-3">
+        <h2 data-form-title class="text-2xl">
+          Nuevo evento
+        </h2>
+        <button
+          type="button"
+          data-close
+          aria-label="Cerrar"
+          class="rounded-lg px-2 text-3xl leading-none transition-colors duration-300 hover:bg-[#31572A]"
+        >
+          ×
+        </button>
+      </div>
+
+      <form data-form class="flex max-h-[70vh] flex-col gap-4 overflow-y-auto px-4 py-5">
+        <input type="hidden" data-field-id />
+
+        <div>
+          <label for="f-title" class="mb-1 block text-lg">
+            Título *
+          </label>
+          <input
+            id="f-title"
+            data-field="title"
+            type="text"
+            required
+            placeholder="Ej.: Noche de rock"
+            class={inputClass}
+          />
         </div>
+
+        <div>
+          <label for="f-artist" class="mb-1 block text-lg">
+            Artista / Banda *
+          </label>
+          <input
+            id="f-artist"
+            data-field="artist"
+            type="text"
+            required
+            placeholder="Ej.: Los Piojos"
+            class={inputClass}
+          />
+        </div>
+
+        <div>
+          <label for="f-description" class="mb-1 block text-lg">
+            Descripción
+          </label>
+          <textarea
+            id="f-description"
+            data-field="description"
+            rows="3"
+            placeholder="Detalles del evento (opcional)"
+            class={inputClass}
+          ></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label for="f-date" class="mb-1 block text-lg">
+              Fecha *
+            </label>
+            <input
+              id="f-date"
+              data-field="date"
+              type="date"
+              required
+              class:list={[inputClass, 'scheme-dark']}
+            />
+          </div>
+          <div>
+            <label for="f-time" class="mb-1 block text-lg">
+              Hora *
+            </label>
+            <input
+              id="f-time"
+              data-field="time"
+              type="time"
+              required
+              value="21:00"
+              class:list={[inputClass, 'scheme-dark']}
+            />
+          </div>
+        </div>
+
+        <div>
+          <span class="mb-1 block text-lg">Flyer</span>
+          <img
+            data-flyer-preview
+            alt=""
+            class="mb-2 hidden max-h-56 w-full rounded-lg border border-[#B45427]/50 bg-black/30 object-contain"
+          />
+          <input
+            data-field="flyer-url"
+            type="url"
+            placeholder="URL de la imagen (opcional)"
+            class={inputClass}
+          />
+          <input
+            data-field="flyer-file"
+            type="file"
+            accept="image/*"
+            class="mt-2 w-full text-lg text-[#FBE9A5]/80 file:mr-3 file:rounded-lg file:border-0 file:bg-[#31572A] file:px-3 file:py-2 file:text-[#FBE9A5] file:hover:bg-[#3f6b3f]"
+          />
+          <p class="mt-1 text-base text-[#FBE9A5]/60">
+            Podés subir una imagen o pegar una URL. Si subís una imagen, se usa esa. La foto se
+            optimiza sola antes de subir (máximo 1600 px de ancho, formato WebP).
+          </p>
+          <p data-flyer-info class="mt-1 hidden text-base text-[#FBE9A5]/80" role="status"></p>
+        </div>
+
+        <div>
+          <label for="f-tickets" class="mb-1 block text-lg">
+            Información de entradas
+          </label>
+          <textarea
+            id="f-tickets"
+            data-field="ticket_info"
+            rows="2"
+            placeholder="Precios, dónde conseguirlas, etc. (opcional)"
+            class={inputClass}
+          ></textarea>
+        </div>
+
+        <label class="flex items-center gap-3 text-lg">
+          <input data-field="published" type="checkbox" class="h-5 w-5 rounded accent-[#31572A]" />
+          <span>
+            Publicado <span class="text-[#FBE9A5]/60">(visible en la web pública)</span>
+          </span>
+        </label>
 
         <p
-            data-status
-            class="mb-4 hidden rounded-lg border border-[#31572A] bg-[#31572A]/30 px-4 py-3 text-lg"
-        >
-        </p>
+          data-form-error
+          class="hidden rounded-lg border border-red-400/60 bg-red-950/40 px-3 py-2 text-lg text-red-200"
+        ></p>
 
-        <ul data-events class="flex flex-col gap-4"></ul>
-
-        <p data-empty class="hidden rounded-2xl border border-dashed border-[#B45427]/60 px-6 py-12 text-center text-xl text-[#FBE9A5]/70">
-            Todavía no hay eventos cargados. Creá el primero con el botón «Nuevo evento».
-        </p>
-    </section>
-
-    <!-- Modal para crear / editar un evento -->
-    <dialog data-dialog class="m-auto w-[calc(100%-2rem)] max-w-lg self-center rounded-2xl border border-[#B45427] bg-[#770a15] p-3 text-[#FBE9A5]">
-        <div class="rounded-xl">
-            <div class="flex items-center justify-between border-b border-[#B45427]/40 px-4 py-3">
-                <h2 data-form-title class="text-2xl">Nuevo evento</h2>
-                <button
-                    type="button"
-                    data-close
-                    aria-label="Cerrar"
-                    class="rounded-lg px-2 text-3xl leading-none transition-colors duration-300 hover:bg-[#31572A]"
-                >
-                    ×
-                </button>
-            </div>
-
-            <form data-form class="flex max-h-[70vh] flex-col gap-4 overflow-y-auto px-4 py-5">
-                <input type="hidden" data-field-id />
-
-                <div>
-                    <label for="f-title" class="mb-1 block text-lg">Título *</label>
-                    <input id="f-title" data-field="title" type="text" required placeholder="Ej.: Noche de rock" class={inputClass} />
-                </div>
-
-                <div>
-                    <label for="f-artist" class="mb-1 block text-lg">Artista / Banda *</label>
-                    <input id="f-artist" data-field="artist" type="text" required placeholder="Ej.: Los Piojos" class={inputClass} />
-                </div>
-
-                <div>
-                    <label for="f-description" class="mb-1 block text-lg">Descripción</label>
-                    <textarea
-                        id="f-description"
-                        data-field="description"
-                        rows="3"
-                        placeholder="Detalles del evento (opcional)"
-                        class={inputClass}
-                    ></textarea>
-                </div>
-
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                        <label for="f-date" class="mb-1 block text-lg">Fecha *</label>
-                        <input id="f-date" data-field="date" type="date" required class:list={[inputClass, 'scheme-dark']} />
-                    </div>
-                    <div>
-                        <label for="f-time" class="mb-1 block text-lg">Hora *</label>
-                        <input
-                            id="f-time"
-                            data-field="time"
-                            type="time"
-                            required
-                            value="21:00"
-                            class:list={[inputClass, 'scheme-dark']}
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <span class="mb-1 block text-lg">Flyer</span>
-                    <img
-                        data-flyer-preview
-                        alt=""
-                        class="mb-2 hidden max-h-56 w-full rounded-lg border border-[#B45427]/50 bg-black/30 object-contain"
-                    />
-                    <input data-field="flyer-url" type="url" placeholder="URL de la imagen (opcional)" class={inputClass} />
-                    <input
-                        data-field="flyer-file"
-                        type="file"
-                        accept="image/*"
-                        class="mt-2 w-full text-lg text-[#FBE9A5]/80 file:mr-3 file:rounded-lg file:border-0 file:bg-[#31572A] file:px-3 file:py-2 file:text-[#FBE9A5] file:hover:bg-[#3f6b3f]"
-                    />
-                    <p class="mt-1 text-base text-[#FBE9A5]/60">
-                        Podés subir una imagen o pegar una URL. Si subís una imagen, se usa esa. La foto se optimiza
-                        sola antes de subir (máximo 1600 px de ancho, formato WebP).
-                    </p>
-                    <p data-flyer-info class="mt-1 hidden text-base text-[#FBE9A5]/80" role="status"></p>
-                </div>
-
-                <div>
-                    <label for="f-tickets" class="mb-1 block text-lg">Información de entradas</label>
-                    <textarea
-                        id="f-tickets"
-                        data-field="ticket_info"
-                        rows="2"
-                        placeholder="Precios, dónde conseguirlas, etc. (opcional)"
-                        class={inputClass}
-                    ></textarea>
-                </div>
-
-                <label class="flex items-center gap-3 text-lg">
-                    <input data-field="published" type="checkbox" class="h-5 w-5 rounded accent-[#31572A]" />
-                    <span>Publicado <span class="text-[#FBE9A5]/60">(visible en la web pública)</span></span>
-                </label>
-
-                <p data-form-error class="hidden rounded-lg border border-red-400/60 bg-red-950/40 px-3 py-2 text-lg text-red-200"></p>
-
-                <div class="mt-1 flex justify-end gap-3">
-                    <button
-                        type="button"
-                        data-cancel
-                        class="rounded-lg border border-[#B45427]/60 px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#8A131F]"
-                    >
-                        Cancelar
-                    </button>
-                    <button
-                        type="submit"
-                        data-save
-                        class="rounded-lg bg-[#31572A] px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#3f6b3f] disabled:opacity-60"
-                    >
-                        Crear evento
-                    </button>
-                </div>
-            </form>
+        <div class="mt-1 flex justify-end gap-3">
+          <button
+            type="button"
+            data-cancel
+            class="rounded-lg border border-[#B45427]/60 px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#8A131F]"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            data-save
+            class="rounded-lg bg-[#31572A] px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#3f6b3f] disabled:opacity-60"
+          >
+            Crear evento
+          </button>
         </div>
-    </dialog>
+      </form>
+    </div>
+  </dialog>
 
-    <!-- Plantilla de la tarjeta de cada evento -->
-    <template data-event-card>
-        <li
-            class="flex flex-col gap-4 rounded-2xl border border-[#B45427]/50 bg-[#770a15] p-4 sm:flex-row sm:items-start"
-        >
-            <img
-                data-t-flyer
-                alt=""
-                class="h-32 w-full shrink-0 rounded-lg border border-[#B45427]/50 bg-black/30 object-cover sm:h-28 sm:w-28"
-            />
-            <div
-                data-t-noflyer
-                class="flex h-32 w-full shrink-0 items-center justify-center rounded-lg border border-dashed border-[#B45427]/50 bg-black/20 text-4xl text-[#FBE9A5]/30 sm:h-28 sm:w-28"
-            >
-                🎸
-            </div>
-            <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-center gap-2">
-                    <h3 data-t-title class="truncate text-2xl"></h3>
-                    <span data-t-badge class="rounded-full bg-[#B45427]/40 px-2.5 py-0.5 text-sm"></span>
-                    <span data-t-pastbadge class="hidden rounded-full bg-black/30 px-2.5 py-0.5 text-sm text-[#FBE9A5]/70">Pasado</span>
-                </div>
-                <p data-t-artist class="text-lg text-[#FBE9A5]/85"></p>
-                <p data-t-date class="text-lg text-[#FBE9A5]/70"></p>
-                <p data-t-description class="empty:hidden truncate text-lg text-[#FBE9A5]/60"></p>
-                <p data-t-tickets class="empty:hidden truncate text-lg text-[#FBE9A5]/60"></p>
-            </div>
-            <div class="flex shrink-0 flex-wrap items-center gap-2 sm:flex-col sm:items-stretch">
-                <button
-                    type="button"
-                    data-t-toggle
-                    class="rounded-lg bg-[#31572A] px-3 py-1.5 text-base transition-colors duration-300 hover:bg-[#3f6b3f] disabled:opacity-50"
-                >
-                </button>
-                <button
-                    type="button"
-                    data-t-edit
-                    class="rounded-lg border border-[#B45427]/60 px-3 py-1.5 text-base transition-colors duration-300 hover:bg-[#8A131F]"
-                >
-                    Editar
-                </button>
-                <button
-                    type="button"
-                    data-t-duplicate
-                    class="rounded-lg border border-[#B45427]/60 px-3 py-1.5 text-base transition-colors duration-300 hover:bg-[#8A131F]"
-                >
-                    Duplicar
-                </button>
-                <button
-                    type="button"
-                    data-t-delete
-                    class="rounded-lg border border-red-400/50 px-3 py-1.5 text-base text-red-200 transition-colors duration-300 hover:bg-red-950/50"
-                >
-                    Borrar
-                </button>
-            </div>
-        </li>
-    </template>
-
-    <!-- Confirmación para borrar (reemplaza al confirm() del navegador) -->
-    <dialog
-        data-confirm
-        class="w-[calc(100%-2rem)] max-w-md self-center rounded-2xl border border-red-400/60 bg-[#770a15] p-6 text-[#FBE9A5]"
-    >
-        <h2 class="text-2xl">Borrar evento</h2>
-        <p class="mt-2 text-lg text-[#FBE9A5]/80">
-            ¿Seguro que querés borrar «<span data-confirm-title class="font-bold"></span>»? Esta acción no se puede
-            deshacer.
-        </p>
-        <div class="mt-6 flex justify-end gap-3">
-            <button
-                type="button"
-                data-confirm-cancel
-                class="rounded-lg border border-[#B45427]/60 px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#8A131F]"
-            >
-                Cancelar
-            </button>
-            <button
-                type="button"
-                data-confirm-ok
-                class="rounded-lg border border-red-400/60 bg-red-950/60 px-5 py-2.5 text-xl text-red-100 transition-colors duration-300 hover:bg-red-900 disabled:opacity-60"
-            >
-                Borrar
-            </button>
+  <!-- Plantilla de la tarjeta de cada evento -->
+  <template data-event-card>
+    <li class="flex flex-col gap-4 rounded-2xl border border-[#B45427]/50 bg-[#770a15] p-4 sm:flex-row sm:items-start">
+      <img
+        data-t-flyer
+        alt=""
+        class="h-32 w-full shrink-0 rounded-lg border border-[#B45427]/50 bg-black/30 object-cover sm:h-28 sm:w-28"
+      />
+      <div
+        data-t-noflyer
+        class="flex h-32 w-full shrink-0 items-center justify-center rounded-lg border border-dashed border-[#B45427]/50 bg-black/20 text-4xl text-[#FBE9A5]/30 sm:h-28 sm:w-28"
+      >
+        🎸
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-2">
+          <h3 data-t-title class="truncate text-2xl"></h3>
+          <span data-t-badge class="rounded-full bg-[#B45427]/40 px-2.5 py-0.5 text-sm"></span>
+          <span
+            data-t-pastbadge
+            class="hidden rounded-full bg-black/30 px-2.5 py-0.5 text-sm text-[#FBE9A5]/70"
+          >
+            Pasado
+          </span>
         </div>
-    </dialog>
+        <p data-t-artist class="text-lg text-[#FBE9A5]/85"></p>
+        <p data-t-date class="text-lg text-[#FBE9A5]/70"></p>
+        <p data-t-description class="empty:hidden truncate text-lg text-[#FBE9A5]/60"></p>
+        <p data-t-tickets class="empty:hidden truncate text-lg text-[#FBE9A5]/60"></p>
+      </div>
+      <div class="flex shrink-0 flex-wrap items-center gap-2 sm:flex-col sm:items-stretch">
+        <button
+          type="button"
+          data-t-toggle
+          class="rounded-lg bg-[#31572A] px-3 py-1.5 text-base transition-colors duration-300 hover:bg-[#3f6b3f] disabled:opacity-50"
+        ></button>
+        <button
+          type="button"
+          data-t-edit
+          class="rounded-lg border border-[#B45427]/60 px-3 py-1.5 text-base transition-colors duration-300 hover:bg-[#8A131F]"
+        >
+          Editar
+        </button>
+        <button
+          type="button"
+          data-t-duplicate
+          class="rounded-lg border border-[#B45427]/60 px-3 py-1.5 text-base transition-colors duration-300 hover:bg-[#8A131F]"
+        >
+          Duplicar
+        </button>
+        <button
+          type="button"
+          data-t-delete
+          class="rounded-lg border border-red-400/50 px-3 py-1.5 text-base text-red-200 transition-colors duration-300 hover:bg-red-950/50"
+        >
+          Borrar
+        </button>
+      </div>
+    </li>
+  </template>
+
+  <!-- Confirmación para borrar (reemplaza al confirm() del navegador) -->
+  <dialog
+    data-confirm
+    class="w-[calc(100%-2rem)] max-w-md self-center rounded-2xl border border-red-400/60 bg-[#770a15] p-6 text-[#FBE9A5]"
+  >
+    <h2 class="text-2xl">Borrar evento</h2>
+    <p class="mt-2 text-lg text-[#FBE9A5]/80">
+      ¿Seguro que querés borrar «<span data-confirm-title class="font-bold"></span>»? Esta acción no
+      se puede deshacer.
+    </p>
+    <div class="mt-6 flex justify-end gap-3">
+      <button
+        type="button"
+        data-confirm-cancel
+        class="rounded-lg border border-[#B45427]/60 px-5 py-2.5 text-xl transition-colors duration-300 hover:bg-[#8A131F]"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        data-confirm-ok
+        class="rounded-lg border border-red-400/60 bg-red-950/60 px-5 py-2.5 text-xl text-red-100 transition-colors duration-300 hover:bg-red-900 disabled:opacity-60"
+      >
+        Borrar
+      </button>
+    </div>
+  </dialog>
 </AdminLayout>
 
 <style>
-    dialog::backdrop {
-        background: rgba(0, 0, 0, 0.65);
-    }
+  dialog::backdrop {
+    background: rgba(0, 0, 0, 0.65);
+  }
 </style>
 
 <script>
-    import { supabase, isSupabaseConfigured, supabaseConfigError } from '../../lib/supabase';
+  import { supabase, isSupabaseConfigured, supabaseConfigError } from '../../lib/supabase';
 
-    type EventRow = {
-        id: string;
-        title: string;
-        artist: string | null;
-        description: string | null;
-        event_date: string;
-        image_url: string | null;
-        ticket_info: string | null;
-        published: boolean;
+  type EventRow = {
+    id: string;
+    title: string;
+    artist: string | null;
+    description: string | null;
+    event_date: string;
+    image_url: string | null;
+    ticket_info: string | null;
+    published: boolean;
+  };
+
+  const FLYER_BUCKET = 'flyers-pulpe';
+  const FLYER_MARKER = `/storage/v1/object/public/${FLYER_BUCKET}/`;
+
+  let events: EventRow[] = [];
+  let editingId: string | null = null;
+  let objectUrl: string | null = null;
+  let statusTimer: ReturnType<typeof setTimeout> | undefined;
+
+  const $ = <T extends Element>(selector: string, root: ParentNode = document): T =>
+    root.querySelector(selector) as T;
+
+  // Referencias a las vistas
+  const loadingView = $('[data-view="loading"]');
+  const contentView = $('[data-view="content"]');
+  const configView = $('[data-view="config"]');
+  const configError = $('[data-config-error]');
+  const eventsList = $('[data-events]');
+  const emptyMessage = $('[data-empty]');
+  const countText = $('[data-count]');
+  const statusBox = $('[data-status]');
+
+  // Referencias al modal
+  const dialog = $<HTMLDialogElement>('dialog[data-dialog]');
+  const form = $<HTMLFormElement>('form[data-form]');
+  const formTitle = $('[data-form-title]');
+  const formError = $('[data-form-error]');
+  const saveButton = $<HTMLButtonElement>('button[data-save]');
+
+  // Referencias a los campos del formulario
+  const fields = {
+    id: $<HTMLInputElement>('input[data-field-id]'),
+    title: $<HTMLInputElement>('input[data-field="title"]'),
+    artist: $<HTMLInputElement>('input[data-field="artist"]'),
+    description: $<HTMLTextAreaElement>('textarea[data-field="description"]'),
+    date: $<HTMLInputElement>('input[data-field="date"]'),
+    time: $<HTMLInputElement>('input[data-field="time"]'),
+    flyerUrl: $<HTMLInputElement>('input[data-field="flyer-url"]'),
+    flyerFile: $<HTMLInputElement>('input[data-field="flyer-file"]'),
+    ticketInfo: $<HTMLTextAreaElement>('textarea[data-field="ticket_info"]'),
+    published: $<HTMLInputElement>('input[data-field="published"]'),
+  };
+  const flyerPreview = $<HTMLImageElement>('img[data-flyer-preview]');
+  const flyerInfo = $<HTMLElement>('[data-flyer-info]');
+  const cardTemplate = $<HTMLTemplateElement>('template[data-event-card]');
+
+  // Confirmación de borrado
+  const confirmDialog = $<HTMLDialogElement>('dialog[data-confirm]');
+  const confirmTitle = $('[data-confirm-title]');
+  const confirmOk = $<HTMLButtonElement>('button[data-confirm-ok]');
+  const confirmCancel = $<HTMLButtonElement>('button[data-confirm-cancel]');
+
+  // ---------- Mensajes de estado ----------
+
+  function showStatus(message: string, type: 'ok' | 'error') {
+    clearTimeout(statusTimer);
+    statusBox.textContent = message;
+    statusBox.classList.remove('hidden');
+    statusBox.classList.toggle('border-[#31572A]', type === 'ok');
+    statusBox.classList.toggle('bg-[#31572A]/30', type === 'ok');
+    statusBox.classList.toggle('border-red-400/60', type === 'error');
+    statusBox.classList.toggle('bg-red-950/40', type === 'error');
+    statusTimer = setTimeout(() => statusBox.classList.add('hidden'), 5000);
+  }
+
+  function showFormError(message: string) {
+    formError.textContent = message;
+    formError.classList.remove('hidden');
+  }
+
+  // ---------- Utilidades ----------
+
+  function randomId(): string {
+    return typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+
+  // Divide la fecha del evento en valores para <input type="date"> y <input type="time"> (horario local).
+  function eventDateParts(eventDate: string): { date: string; time: string } {
+    const dt = new Date(eventDate);
+    return {
+      date: dt.toLocaleDateString('en-CA'), // YYYY-MM-DD
+      time: dt.toTimeString().slice(0, 5), // HH:MM
     };
+  }
 
-    const FLYER_BUCKET = 'flyers-pulpe';
-    const FLYER_MARKER = `/storage/v1/object/public/${FLYER_BUCKET}/`;
+  function formatEventDate(eventDate: string): string {
+    const dt = new Date(eventDate);
+    const fecha = dt.toLocaleDateString('es-AR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    const hora = dt.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    return `${fecha} · ${hora} hs`;
+  }
 
-    let events: EventRow[] = [];
-    let editingId: string | null = null;
-    let objectUrl: string | null = null;
-    let statusTimer: ReturnType<typeof setTimeout> | undefined;
+  // ---------- Optimización del flyer ----------
 
-    const $ = <T extends Element>(selector: string, root: ParentNode = document): T =>
-        root.querySelector(selector) as T;
+  const MAX_FLYER_SIDE = 1600;
+  const WEBP_QUALITY = 0.82;
 
-    // Referencias a las vistas
-    const loadingView = $('[data-view="loading"]');
-    const contentView = $('[data-view="content"]');
-    const configView = $('[data-view="config"]');
-    const configError = $('[data-config-error]');
-    const eventsList = $('[data-events]');
-    const emptyMessage = $('[data-empty]');
-    const countText = $('[data-count]');
-    const statusBox = $('[data-status]');
+  function formatBytes(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  }
 
-    // Referencias al modal
-    const dialog = $<HTMLDialogElement>('dialog[data-dialog]');
-    const form = $<HTMLFormElement>('form[data-form]');
-    const formTitle = $('[data-form-title]');
-    const formError = $('[data-form-error]');
-    const saveButton = $<HTMLButtonElement>('button[data-save]');
+  function showFlyerInfo(message: string) {
+    flyerInfo.textContent = message;
+    flyerInfo.classList.remove('hidden');
+  }
 
-    // Referencias a los campos del formulario
-    const fields = {
-        id: $<HTMLInputElement>('input[data-field-id]'),
-        title: $<HTMLInputElement>('input[data-field="title"]'),
-        artist: $<HTMLInputElement>('input[data-field="artist"]'),
-        description: $<HTMLTextAreaElement>('textarea[data-field="description"]'),
-        date: $<HTMLInputElement>('input[data-field="date"]'),
-        time: $<HTMLInputElement>('input[data-field="time"]'),
-        flyerUrl: $<HTMLInputElement>('input[data-field="flyer-url"]'),
-        flyerFile: $<HTMLInputElement>('input[data-field="flyer-file"]'),
-        ticketInfo: $<HTMLTextAreaElement>('textarea[data-field="ticket_info"]'),
-        published: $<HTMLInputElement>('input[data-field="published"]'),
-    };
-    const flyerPreview = $<HTMLImageElement>('img[data-flyer-preview]');
-    const flyerInfo = $<HTMLElement>('[data-flyer-info]');
-    const cardTemplate = $<HTMLTemplateElement>('template[data-event-card]');
-
-    // Confirmación de borrado
-    const confirmDialog = $<HTMLDialogElement>('dialog[data-confirm]');
-    const confirmTitle = $('[data-confirm-title]');
-    const confirmOk = $<HTMLButtonElement>('button[data-confirm-ok]');
-    const confirmCancel = $<HTMLButtonElement>('button[data-confirm-cancel]');
-
-    // ---------- Mensajes de estado ----------
-
-    function showStatus(message: string, type: 'ok' | 'error') {
-        clearTimeout(statusTimer);
-        statusBox.textContent = message;
-        statusBox.classList.remove('hidden');
-        statusBox.classList.toggle('border-[#31572A]', type === 'ok');
-        statusBox.classList.toggle('bg-[#31572A]/30', type === 'ok');
-        statusBox.classList.toggle('border-red-400/60', type === 'error');
-        statusBox.classList.toggle('bg-red-950/40', type === 'error');
-        statusTimer = setTimeout(() => statusBox.classList.add('hidden'), 5000);
+  /**
+   * Redimensiona a 1600 px y convierte a WebP en el navegador antes de subir.
+   * Así una foto de celular de 10 MB no termina pesando eso en la portada.
+   */
+  async function optimizeFlyer(file: File): Promise<File> {
+    // SVG y GIF se suben tal cual: el canvas los rasterizaría o perdería la animación.
+    if (
+      !file.type.startsWith('image/') ||
+      file.type === 'image/svg+xml' ||
+      file.type === 'image/gif'
+    ) {
+      return file;
     }
 
-    function showFormError(message: string) {
-        formError.textContent = message;
-        formError.classList.remove('hidden');
+    let bitmap: ImageBitmap;
+    try {
+      bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    } catch {
+      throw new Error(
+        'No pudimos leer la imagen. Si es una foto de iPhone en formato HEIC, ' +
+          'convertila a JPG o elegí «Más compatible» al sacarla.'
+      );
     }
 
-    // ---------- Utilidades ----------
+    const scale = Math.min(1, MAX_FLYER_SIDE / Math.max(bitmap.width, bitmap.height));
+    const width = Math.round(bitmap.width * scale);
+    const height = Math.round(bitmap.height * scale);
 
-    function randomId(): string {
-        return typeof crypto !== 'undefined' && 'randomUUID' in crypto
-            ? crypto.randomUUID()
-            : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    const context = canvas.getContext('2d');
+    if (!context) {
+      bitmap.close();
+      return file;
     }
 
-    // Divide la fecha del evento en valores para <input type="date"> y <input type="time"> (horario local).
-    function eventDateParts(eventDate: string): { date: string; time: string } {
-        const dt = new Date(eventDate);
-        return {
-            date: dt.toLocaleDateString('en-CA'), // YYYY-MM-DD
-            time: dt.toTimeString().slice(0, 5), // HH:MM
-        };
-    }
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = 'high';
+    context.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close();
 
-    function formatEventDate(eventDate: string): string {
-        const dt = new Date(eventDate);
-        const fecha = dt.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-        const hora = dt.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-        return `${fecha} · ${hora} hs`;
-    }
-
-    // ---------- Optimización del flyer ----------
-
-    const MAX_FLYER_SIDE = 1600;
-    const WEBP_QUALITY = 0.82;
-
-    function formatBytes(bytes: number): string {
-        if (bytes < 1024) return `${bytes} B`;
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-        return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-    }
-
-    function showFlyerInfo(message: string) {
-        flyerInfo.textContent = message;
-        flyerInfo.classList.remove('hidden');
-    }
-
-    /**
-     * Redimensiona a 1600 px y convierte a WebP en el navegador antes de subir.
-     * Así una foto de celular de 10 MB no termina pesando eso en la portada.
-     */
-    async function optimizeFlyer(file: File): Promise<File> {
-        // SVG y GIF se suben tal cual: el canvas los rasterizaría o perdería la animación.
-        if (!file.type.startsWith('image/') || file.type === 'image/svg+xml' || file.type === 'image/gif') {
-            return file;
-        }
-
-        let bitmap: ImageBitmap;
-        try {
-            bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
-        } catch {
-            throw new Error(
-                'No pudimos leer la imagen. Si es una foto de iPhone en formato HEIC, ' +
-                    'convertila a JPG o elegí «Más compatible» al sacarla.'
-            );
-        }
-
-        const scale = Math.min(1, MAX_FLYER_SIDE / Math.max(bitmap.width, bitmap.height));
-        const width = Math.round(bitmap.width * scale);
-        const height = Math.round(bitmap.height * scale);
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-
-        const context = canvas.getContext('2d');
-        if (!context) {
-            bitmap.close();
-            return file;
-        }
-
-        context.imageSmoothingEnabled = true;
-        context.imageSmoothingQuality = 'high';
-        context.drawImage(bitmap, 0, 0, width, height);
-        bitmap.close();
-
-        const blob = await new Promise<Blob | null>((resolve) => {
-            canvas.toBlob(resolve, 'image/webp', WEBP_QUALITY);
-        });
-
-        if (!blob) return file;
-
-        // Si el original ya era chico y el WebP pesa más, no vale la pena re-codificar.
-        if (scale === 1 && blob.size >= file.size) return file;
-
-        const baseName = file.name.replace(/\.[^.]+$/, '') || 'flyer';
-        return new File([blob], `${baseName}.webp`, { type: 'image/webp' });
-    }
-
-    // ---------- Flyers (Supabase Storage) ----------
-
-    async function uploadFlyer(file: File): Promise<string> {
-        const extension = (file.name.split('.').pop() ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
-        const path = `${randomId()}${extension ? `.${extension}` : ''}`;
-        const { error } = await supabase.storage.from(FLYER_BUCKET).upload(path, file, {
-            contentType: file.type,
-            cacheControl: '3600',
-        });
-        if (error) throw error;
-        const { data } = supabase.storage.from(FLYER_BUCKET).getPublicUrl(path);
-        return data.publicUrl;
-    }
-
-    // Borra de Storage el flyer, pero solo si es una imagen nuestra (no una URL externa).
-    async function removeFlyer(url: string | null | undefined) {
-        if (!url) return;
-        const index = url.indexOf(FLYER_MARKER);
-        if (index === -1) return;
-        const path = decodeURIComponent(url.slice(index + FLYER_MARKER.length)).split('?')[0];
-        try {
-            await supabase.storage.from(FLYER_BUCKET).remove([path]);
-        } catch {
-            // No es crítico si falla.
-        }
-    }
-
-    // Un evento duplicado comparte el flyer: no hay que borrarlo mientras otro lo use.
-    function isFlyerShared(url: string | null | undefined, excludeId: string): boolean {
-        if (!url) return false;
-        return events.some((ev) => ev.id !== excludeId && ev.image_url === url);
-    }
-
-    function setFlyerPreview(url: string | null, file: File | null) {
-        if (objectUrl) {
-            URL.revokeObjectURL(objectUrl);
-            objectUrl = null;
-        }
-        if (file) {
-            objectUrl = URL.createObjectURL(file);
-            flyerPreview.src = objectUrl;
-            flyerPreview.classList.remove('hidden');
-        } else if (url) {
-            flyerPreview.src = url;
-            flyerPreview.classList.remove('hidden');
-        } else {
-            flyerPreview.removeAttribute('src');
-            flyerPreview.classList.add('hidden');
-        }
-    }
-
-    // ---------- Datos ----------
-
-    async function loadEvents() {
-        const { data, error } = await supabase.from('events').select('*').order('event_date', { ascending: false });
-        if (error) {
-            showStatus(`No se pudieron cargar los eventos: ${error.message}`, 'error');
-            return;
-        }
-        events = (data as EventRow[]) ?? [];
-        renderEvents();
-    }
-
-    function renderEvents() {
-        eventsList.replaceChildren();
-        const now = Date.now();
-
-        events.forEach((ev) => {
-            const card = cardTemplate.content.firstElementChild?.cloneNode(true) as HTMLElement | null;
-            if (!card) return;
-
-            const isPast = new Date(ev.event_date).getTime() < now;
-            card.classList.toggle('opacity-60', isPast);
-
-            const flyerImg = $<HTMLImageElement>('img[data-t-flyer]', card);
-            const noFlyer = $('[data-t-noflyer]', card);
-            if (ev.image_url && flyerImg) {
-                flyerImg.src = ev.image_url;
-                flyerImg.alt = `Flyer de ${ev.title}`;
-                noFlyer.classList.add('hidden');
-            } else {
-                flyerImg.classList.add('hidden');
-            }
-
-            $('[data-t-title]', card).textContent = ev.title;
-            $('[data-t-artist]', card).textContent = ev.artist ?? '';
-            $('[data-t-date]', card).textContent = formatEventDate(ev.event_date);
-            $('[data-t-description]', card).textContent = ev.description ?? '';
-            $('[data-t-tickets]', card).textContent = ev.ticket_info ?? '';
-
-            const badge = $('[data-t-badge]', card);
-            badge.textContent = ev.published ? 'Publicado' : 'Borrador';
-            badge.classList.toggle('bg-[#31572A]', ev.published);
-            badge.classList.toggle('bg-[#B45427]/40', !ev.published);
-
-            $('[data-t-pastbadge]', card).classList.toggle('hidden', !isPast);
-
-            const toggle = $<HTMLButtonElement>('button[data-t-toggle]', card);
-            toggle.textContent = ev.published ? 'Despublicar' : 'Publicar';
-
-            toggle.addEventListener('click', () => void togglePublished(ev));
-            $<HTMLButtonElement>('button[data-t-edit]', card).addEventListener('click', () => openDialog(ev));
-            $<HTMLButtonElement>('button[data-t-duplicate]', card).addEventListener('click', () =>
-                openDialog(ev, 'duplicate')
-            );
-            $<HTMLButtonElement>('button[data-t-delete]', card).addEventListener('click', () => void deleteEvent(ev));
-
-            eventsList.append(card);
-        });
-
-        const publicados = events.filter((ev) => ev.published).length;
-        countText.textContent = `${events.length} ${events.length === 1 ? 'evento' : 'eventos'} · ${publicados} ${
-            publicados === 1 ? 'publicado' : 'publicados'
-        }`;
-        emptyMessage.classList.toggle('hidden', events.length > 0);
-    }
-
-    // ---------- Acciones ----------
-
-    function askDelete(title: string): Promise<boolean> {
-        confirmTitle.textContent = title;
-        confirmDialog.returnValue = '';
-        confirmDialog.showModal();
-
-        return new Promise((resolve) => {
-            const onClose = () => {
-                confirmDialog.removeEventListener('close', onClose);
-                resolve(confirmDialog.returnValue === 'confirm');
-            };
-            confirmDialog.addEventListener('close', onClose);
-        });
-    }
-
-    confirmCancel.addEventListener('click', () => {
-        confirmDialog.returnValue = '';
-        confirmDialog.close();
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, 'image/webp', WEBP_QUALITY);
     });
 
-    confirmOk.addEventListener('click', () => {
-        confirmDialog.returnValue = 'confirm';
-        confirmDialog.close();
+    if (!blob) return file;
+
+    // Si el original ya era chico y el WebP pesa más, no vale la pena re-codificar.
+    if (scale === 1 && blob.size >= file.size) return file;
+
+    const baseName = file.name.replace(/\.[^.]+$/, '') || 'flyer';
+    return new File([blob], `${baseName}.webp`, { type: 'image/webp' });
+  }
+
+  // ---------- Flyers (Supabase Storage) ----------
+
+  async function uploadFlyer(file: File): Promise<string> {
+    const extension = (file.name.split('.').pop() ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const path = `${randomId()}${extension ? `.${extension}` : ''}`;
+    const { error } = await supabase.storage.from(FLYER_BUCKET).upload(path, file, {
+      contentType: file.type,
+      cacheControl: '3600',
+    });
+    if (error) throw error;
+    const { data } = supabase.storage.from(FLYER_BUCKET).getPublicUrl(path);
+    return data.publicUrl;
+  }
+
+  // Borra de Storage el flyer, pero solo si es una imagen nuestra (no una URL externa).
+  async function removeFlyer(url: string | null | undefined) {
+    if (!url) return;
+    const index = url.indexOf(FLYER_MARKER);
+    if (index === -1) return;
+    const path = decodeURIComponent(url.slice(index + FLYER_MARKER.length)).split('?')[0];
+    try {
+      await supabase.storage.from(FLYER_BUCKET).remove([path]);
+    } catch {
+      // No es crítico si falla.
+    }
+  }
+
+  // Un evento duplicado comparte el flyer: no hay que borrarlo mientras otro lo use.
+  function isFlyerShared(url: string | null | undefined, excludeId: string): boolean {
+    if (!url) return false;
+    return events.some((ev) => ev.id !== excludeId && ev.image_url === url);
+  }
+
+  function setFlyerPreview(url: string | null, file: File | null) {
+    if (objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+      objectUrl = null;
+    }
+    if (file) {
+      objectUrl = URL.createObjectURL(file);
+      flyerPreview.src = objectUrl;
+      flyerPreview.classList.remove('hidden');
+    } else if (url) {
+      flyerPreview.src = url;
+      flyerPreview.classList.remove('hidden');
+    } else {
+      flyerPreview.removeAttribute('src');
+      flyerPreview.classList.add('hidden');
+    }
+  }
+
+  // ---------- Datos ----------
+
+  async function loadEvents() {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .order('event_date', { ascending: false });
+    if (error) {
+      showStatus(`No se pudieron cargar los eventos: ${error.message}`, 'error');
+      return;
+    }
+    events = (data as EventRow[]) ?? [];
+    renderEvents();
+  }
+
+  function renderEvents() {
+    eventsList.replaceChildren();
+    const now = Date.now();
+
+    events.forEach((ev) => {
+      const card = cardTemplate.content.firstElementChild?.cloneNode(true) as HTMLElement | null;
+      if (!card) return;
+
+      const isPast = new Date(ev.event_date).getTime() < now;
+      card.classList.toggle('opacity-60', isPast);
+
+      const flyerImg = $<HTMLImageElement>('img[data-t-flyer]', card);
+      const noFlyer = $('[data-t-noflyer]', card);
+      if (ev.image_url && flyerImg) {
+        flyerImg.src = ev.image_url;
+        flyerImg.alt = `Flyer de ${ev.title}`;
+        noFlyer.classList.add('hidden');
+      } else {
+        flyerImg.classList.add('hidden');
+      }
+
+      $('[data-t-title]', card).textContent = ev.title;
+      $('[data-t-artist]', card).textContent = ev.artist ?? '';
+      $('[data-t-date]', card).textContent = formatEventDate(ev.event_date);
+      $('[data-t-description]', card).textContent = ev.description ?? '';
+      $('[data-t-tickets]', card).textContent = ev.ticket_info ?? '';
+
+      const badge = $('[data-t-badge]', card);
+      badge.textContent = ev.published ? 'Publicado' : 'Borrador';
+      badge.classList.toggle('bg-[#31572A]', ev.published);
+      badge.classList.toggle('bg-[#B45427]/40', !ev.published);
+
+      $('[data-t-pastbadge]', card).classList.toggle('hidden', !isPast);
+
+      const toggle = $<HTMLButtonElement>('button[data-t-toggle]', card);
+      toggle.textContent = ev.published ? 'Despublicar' : 'Publicar';
+
+      toggle.addEventListener('click', () => void togglePublished(ev));
+      $<HTMLButtonElement>('button[data-t-edit]', card).addEventListener('click', () =>
+        openDialog(ev)
+      );
+      $<HTMLButtonElement>('button[data-t-duplicate]', card).addEventListener('click', () =>
+        openDialog(ev, 'duplicate')
+      );
+      $<HTMLButtonElement>('button[data-t-delete]', card).addEventListener(
+        'click',
+        () => void deleteEvent(ev)
+      );
+
+      eventsList.append(card);
     });
 
-    // Cerrar al hacer clic en el fondo, como el modal de edición.
-    confirmDialog.addEventListener('click', (event) => {
-        if (event.target === confirmDialog) {
-            confirmDialog.returnValue = '';
-            confirmDialog.close();
-        }
+    const publicados = events.filter((ev) => ev.published).length;
+    countText.textContent = `${events.length} ${events.length === 1 ? 'evento' : 'eventos'} · ${publicados} ${
+      publicados === 1 ? 'publicado' : 'publicados'
+    }`;
+    emptyMessage.classList.toggle('hidden', events.length > 0);
+  }
+
+  // ---------- Acciones ----------
+
+  function askDelete(title: string): Promise<boolean> {
+    confirmTitle.textContent = title;
+    confirmDialog.returnValue = '';
+    confirmDialog.showModal();
+
+    return new Promise((resolve) => {
+      const onClose = () => {
+        confirmDialog.removeEventListener('close', onClose);
+        resolve(confirmDialog.returnValue === 'confirm');
+      };
+      confirmDialog.addEventListener('close', onClose);
+    });
+  }
+
+  confirmCancel.addEventListener('click', () => {
+    confirmDialog.returnValue = '';
+    confirmDialog.close();
+  });
+
+  confirmOk.addEventListener('click', () => {
+    confirmDialog.returnValue = 'confirm';
+    confirmDialog.close();
+  });
+
+  // Cerrar al hacer clic en el fondo, como el modal de edición.
+  confirmDialog.addEventListener('click', (event) => {
+    if (event.target === confirmDialog) {
+      confirmDialog.returnValue = '';
+      confirmDialog.close();
+    }
+  });
+
+  async function togglePublished(ev: EventRow) {
+    const { error } = await supabase
+      .from('events')
+      .update({ published: !ev.published })
+      .eq('id', ev.id);
+    if (error) {
+      showStatus(`No se pudo actualizar el evento: ${error.message}`, 'error');
+      return;
+    }
+    ev.published = !ev.published;
+    renderEvents();
+    showStatus(
+      ev.published
+        ? `«${ev.title}» ahora es visible en la web.`
+        : `«${ev.title}» dejó de ser visible.`,
+      'ok'
+    );
+  }
+
+  async function deleteEvent(ev: EventRow) {
+    if (!(await askDelete(ev.title))) return;
+
+    const { error } = await supabase.from('events').delete().eq('id', ev.id);
+    if (error) {
+      showStatus(`No se pudo borrar el evento: ${error.message}`, 'error');
+      return;
+    }
+    if (!isFlyerShared(ev.image_url, ev.id)) await removeFlyer(ev.image_url);
+    showStatus('Evento borrado.', 'ok');
+    await loadEvents();
+  }
+
+  // ---------- Exportar CSV ----------
+
+  function csvCell(value: string): string {
+    return /[",;\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+  }
+
+  function exportCsv() {
+    if (events.length === 0) {
+      showStatus('No hay eventos para exportar todavía.', 'error');
+      return;
+    }
+
+    const header = [
+      'Título',
+      'Artista',
+      'Fecha',
+      'Hora',
+      'Estado',
+      'Entradas',
+      'Descripción',
+      'Flyer',
+      'ID',
+    ];
+    const rows = events.map((ev) => {
+      const date = new Date(ev.event_date);
+      return [
+        ev.title,
+        ev.artist ?? '',
+        date.toLocaleDateString('es-AR'),
+        date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+        ev.published ? 'Publicado' : 'Borrador',
+        ev.ticket_info ?? '',
+        ev.description ?? '',
+        ev.image_url ?? '',
+        ev.id,
+      ];
     });
 
-    async function togglePublished(ev: EventRow) {
-        const { error } = await supabase.from('events').update({ published: !ev.published }).eq('id', ev.id);
-        if (error) {
-            showStatus(`No se pudo actualizar el evento: ${error.message}`, 'error');
-            return;
-        }
-        ev.published = !ev.published;
-        renderEvents();
-        showStatus(ev.published ? `«${ev.title}» ahora es visible en la web.` : `«${ev.title}» dejó de ser visible.`, 'ok');
+    // BOM + punto y coma: Excel en español abre el archivo directamente en columnas.
+    const csv = '\ufeff' + [header, ...rows].map((row) => row.map(csvCell).join(';')).join('\r\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `eventos-pulperia-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showStatus(`Se descargaron ${events.length} eventos en CSV.`, 'ok');
+  }
+
+  $('[data-export]').addEventListener('click', exportCsv);
+
+  // ---------- Modal ----------
+
+  type DialogMode = 'new' | 'edit' | 'duplicate';
+
+  function openDialog(ev: EventRow | null, mode: DialogMode = ev ? 'edit' : 'new') {
+    editingId = mode === 'edit' ? (ev?.id ?? null) : null;
+    formError.classList.add('hidden');
+    flyerInfo.classList.add('hidden');
+
+    formTitle.textContent =
+      mode === 'edit' ? 'Editar evento' : mode === 'duplicate' ? 'Duplicar evento' : 'Nuevo evento';
+    saveButton.textContent = mode === 'edit' ? 'Guardar cambios' : 'Crear evento';
+
+    const base = mode === 'new' ? null : ev;
+
+    fields.id.value = editingId ?? '';
+    fields.title.value = base ? (mode === 'duplicate' ? `${base.title} (copia)` : base.title) : '';
+    fields.artist.value = base?.artist ?? '';
+    fields.description.value = base?.description ?? '';
+
+    const { date, time } = base ? eventDateParts(base.event_date) : { date: '', time: '21:00' };
+    fields.date.value = date;
+    fields.time.value = time || '21:00';
+
+    fields.flyerUrl.value = base?.image_url ?? '';
+    fields.flyerFile.value = '';
+    fields.ticketInfo.value = base?.ticket_info ?? '';
+    // Una copia arranca como borrador para no duplicar algo visible sin querer.
+    fields.published.checked = mode === 'duplicate' ? false : (base?.published ?? false);
+
+    setFlyerPreview(base?.image_url ?? null, null);
+    dialog.showModal();
+    fields.title.focus();
+  }
+
+  $('[data-new]').addEventListener('click', () => openDialog(null));
+  $('[data-close]').addEventListener('click', () => dialog.close());
+  $('[data-cancel]').addEventListener('click', () => dialog.close());
+
+  // Cerrar al hacer clic en el fondo del modal.
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+
+  fields.flyerFile.addEventListener('change', () => {
+    const file = fields.flyerFile.files?.[0] ?? null;
+    if (file && fields.flyerUrl.value.trim()) {
+      // El archivo tiene prioridad sobre la URL.
+      fields.flyerUrl.value = '';
+    }
+    setFlyerPreview(null, file);
+
+    if (file) {
+      showFlyerInfo(`Imagen seleccionada: ${formatBytes(file.size)}. Se optimiza al guardar.`);
+    } else {
+      flyerInfo.classList.add('hidden');
+    }
+  });
+
+  fields.flyerUrl.addEventListener('change', () => {
+    if (fields.flyerFile.files?.length) return;
+    flyerInfo.classList.add('hidden');
+    setFlyerPreview(fields.flyerUrl.value.trim() || null, null);
+  });
+
+  // ---------- Guardar (crear / editar) ----------
+
+  form.addEventListener('submit', async (submitEvent) => {
+    submitEvent.preventDefault();
+    formError.classList.add('hidden');
+
+    const title = fields.title.value.trim();
+    const artist = fields.artist.value.trim();
+    const date = fields.date.value;
+    const time = fields.time.value || '21:00';
+
+    if (!title || !artist || !date) {
+      showFormError('Completá el título, el artista y la fecha.');
+      return;
     }
 
-    async function deleteEvent(ev: EventRow) {
-        if (!(await askDelete(ev.title))) return;
-
-        const { error } = await supabase.from('events').delete().eq('id', ev.id);
-        if (error) {
-            showStatus(`No se pudo borrar el evento: ${error.message}`, 'error');
-            return;
-        }
-        if (!isFlyerShared(ev.image_url, ev.id)) await removeFlyer(ev.image_url);
-        showStatus('Evento borrado.', 'ok');
-        await loadEvents();
+    // Fecha + hora se interpretan en el horario local y se guardan como timestamp UTC.
+    const eventDate = new Date(`${date}T${time}`);
+    if (Number.isNaN(eventDate.getTime())) {
+      showFormError('La fecha y la hora no son válidas.');
+      return;
     }
 
-    // ---------- Exportar CSV ----------
+    const originalFile = fields.flyerFile.files?.[0] ?? null;
+    const urlValue = fields.flyerUrl.value.trim() || null;
 
-    function csvCell(value: string): string {
-        return /[",;\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
-    }
+    saveButton.disabled = true;
+    saveButton.textContent = originalFile ? 'Optimizando imagen…' : 'Guardando…';
 
-    function exportCsv() {
-        if (events.length === 0) {
-            showStatus('No hay eventos para exportar todavía.', 'error');
-            return;
-        }
-
-        const header = ['Título', 'Artista', 'Fecha', 'Hora', 'Estado', 'Entradas', 'Descripción', 'Flyer', 'ID'];
-        const rows = events.map((ev) => {
-            const date = new Date(ev.event_date);
-            return [
-                ev.title,
-                ev.artist ?? '',
-                date.toLocaleDateString('es-AR'),
-                date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
-                ev.published ? 'Publicado' : 'Borrador',
-                ev.ticket_info ?? '',
-                ev.description ?? '',
-                ev.image_url ?? '',
-                ev.id,
-            ];
-        });
-
-        // BOM + punto y coma: Excel en español abre el archivo directamente en columnas.
-        const csv = '\ufeff' + [header, ...rows].map((row) => row.map(csvCell).join(';')).join('\r\n');
-        const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `eventos-pulperia-${new Date().toISOString().slice(0, 10)}.csv`;
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        showStatus(`Se descargaron ${events.length} eventos en CSV.`, 'ok');
-    }
-
-    $('[data-export]').addEventListener('click', exportCsv);
-
-    // ---------- Modal ----------
-
-    type DialogMode = 'new' | 'edit' | 'duplicate';
-
-    function openDialog(ev: EventRow | null, mode: DialogMode = ev ? 'edit' : 'new') {
-        editingId = mode === 'edit' ? ev?.id ?? null : null;
-        formError.classList.add('hidden');
-        flyerInfo.classList.add('hidden');
-
-        formTitle.textContent =
-            mode === 'edit' ? 'Editar evento' : mode === 'duplicate' ? 'Duplicar evento' : 'Nuevo evento';
-        saveButton.textContent = mode === 'edit' ? 'Guardar cambios' : 'Crear evento';
-
-        const base = mode === 'new' ? null : ev;
-
-        fields.id.value = editingId ?? '';
-        fields.title.value = base ? (mode === 'duplicate' ? `${base.title} (copia)` : base.title) : '';
-        fields.artist.value = base?.artist ?? '';
-        fields.description.value = base?.description ?? '';
-
-        const { date, time } = base ? eventDateParts(base.event_date) : { date: '', time: '21:00' };
-        fields.date.value = date;
-        fields.time.value = time || '21:00';
-
-        fields.flyerUrl.value = base?.image_url ?? '';
-        fields.flyerFile.value = '';
-        fields.ticketInfo.value = base?.ticket_info ?? '';
-        // Una copia arranca como borrador para no duplicar algo visible sin querer.
-        fields.published.checked = mode === 'duplicate' ? false : base?.published ?? false;
-
-        setFlyerPreview(base?.image_url ?? null, null);
-        dialog.showModal();
-        fields.title.focus();
-    }
-
-    $('[data-new]').addEventListener('click', () => openDialog(null));
-    $('[data-close]').addEventListener('click', () => dialog.close());
-    $('[data-cancel]').addEventListener('click', () => dialog.close());
-
-    // Cerrar al hacer clic en el fondo del modal.
-    dialog.addEventListener('click', (event) => {
-        if (event.target === dialog) dialog.close();
-    });
-
-    fields.flyerFile.addEventListener('change', () => {
-        const file = fields.flyerFile.files?.[0] ?? null;
-        if (file && fields.flyerUrl.value.trim()) {
-            // El archivo tiene prioridad sobre la URL.
-            fields.flyerUrl.value = '';
-        }
-        setFlyerPreview(null, file);
-
-        if (file) {
-            showFlyerInfo(`Imagen seleccionada: ${formatBytes(file.size)}. Se optimiza al guardar.`);
-        } else {
-            flyerInfo.classList.add('hidden');
-        }
-    });
-
-    fields.flyerUrl.addEventListener('change', () => {
-        if (fields.flyerFile.files?.length) return;
-        flyerInfo.classList.add('hidden');
-        setFlyerPreview(fields.flyerUrl.value.trim() || null, null);
-    });
-
-    // ---------- Guardar (crear / editar) ----------
-
-    form.addEventListener('submit', async (submitEvent) => {
-        submitEvent.preventDefault();
-        formError.classList.add('hidden');
-
-        const title = fields.title.value.trim();
-        const artist = fields.artist.value.trim();
-        const date = fields.date.value;
-        const time = fields.time.value || '21:00';
-
-        if (!title || !artist || !date) {
-            showFormError('Completá el título, el artista y la fecha.');
-            return;
-        }
-
-        // Fecha + hora se interpretan en el horario local y se guardan como timestamp UTC.
-        const eventDate = new Date(`${date}T${time}`);
-        if (Number.isNaN(eventDate.getTime())) {
-            showFormError('La fecha y la hora no son válidas.');
-            return;
-        }
-
-        const originalFile = fields.flyerFile.files?.[0] ?? null;
-        const urlValue = fields.flyerUrl.value.trim() || null;
-
-        saveButton.disabled = true;
-        saveButton.textContent = originalFile ? 'Optimizando imagen…' : 'Guardando…';
-
-        let imageUrl: string | null = urlValue;
-        if (originalFile) {
-            try {
-                const file = await optimizeFlyer(originalFile);
-                showFlyerInfo(
-                    file === originalFile
-                        ? `Imagen lista: ${formatBytes(file.size)}.`
-                        : `Imagen optimizada: ${formatBytes(originalFile.size)} → ${formatBytes(file.size)}.`
-                );
-                saveButton.textContent = 'Guardando…';
-                imageUrl = await uploadFlyer(file);
-            } catch (uploadError) {
-                showFormError(
-                    `No se pudo subir el flyer: ${(uploadError as Error).message}. ` +
-                        'Si el problema continúa, pegá la URL de la imagen o verificá el bucket «flyers-pulpe» en Supabase Storage (mirá supabase-setup.sql).'
-                );
-                saveButton.disabled = false;
-                saveButton.textContent = editingId ? 'Guardar cambios' : 'Crear evento';
-                return;
-            }
-        }
-
-        const payload = {
-            title,
-            artist,
-            description: fields.description.value.trim() || null,
-            event_date: eventDate.toISOString(),
-            image_url: imageUrl,
-            ticket_info: fields.ticketInfo.value.trim() || null,
-            published: fields.published.checked,
-        };
-
-        const previousImageUrl = editingId ? events.find((ev) => ev.id === editingId)?.image_url ?? null : null;
-
-        const { error } = editingId
-            ? await supabase.from('events').update(payload).eq('id', editingId)
-            : await supabase.from('events').insert(payload);
-
+    let imageUrl: string | null = urlValue;
+    if (originalFile) {
+      try {
+        const file = await optimizeFlyer(originalFile);
+        showFlyerInfo(
+          file === originalFile
+            ? `Imagen lista: ${formatBytes(file.size)}.`
+            : `Imagen optimizada: ${formatBytes(originalFile.size)} → ${formatBytes(file.size)}.`
+        );
+        saveButton.textContent = 'Guardando…';
+        imageUrl = await uploadFlyer(file);
+      } catch (uploadError) {
+        showFormError(
+          `No se pudo subir el flyer: ${(uploadError as Error).message}. ` +
+            'Si el problema continúa, pegá la URL de la imagen o verificá el bucket «flyers-pulpe» en Supabase Storage (mirá supabase-setup.sql).'
+        );
         saveButton.disabled = false;
         saveButton.textContent = editingId ? 'Guardar cambios' : 'Crear evento';
-
-        if (error) {
-            const hint =
-                error.code === '42501'
-                    ? ' (no tenés permisos: ejecutá supabase-setup.sql en el editor SQL de Supabase)'
-                    : '';
-            showFormError(`No se pudo guardar el evento: ${error.message}${hint}`);
-            return;
-        }
-
-        // Si cambió el flyer y el anterior era nuestro, lo borramos de Storage.
-        if (
-            editingId &&
-            previousImageUrl &&
-            previousImageUrl !== imageUrl &&
-            !isFlyerShared(previousImageUrl, editingId)
-        ) {
-            await removeFlyer(previousImageUrl);
-        }
-
-        dialog.close();
-        await loadEvents();
-        showStatus(editingId ? 'Evento actualizado.' : 'Evento creado.', 'ok');
-    });
-
-    // ---------- Inicio ----------
-
-    async function init() {
-        if (!isSupabaseConfigured) {
-            loadingView.classList.add('hidden');
-            configView.classList.add('flex');
-            configView.classList.remove('hidden');
-            configError.textContent = supabaseConfigError ?? 'Supabase no está configurado.';
-            return;
-        }
-
-        const { data } = await supabase.auth.getSession();
-        if (!data.session) {
-            window.location.replace('/admin/login');
-            return;
-        }
-        await loadEvents();
-        loadingView.classList.add('hidden');
-        contentView.classList.remove('hidden');
+        return;
+      }
     }
 
-    void init();
+    const payload = {
+      title,
+      artist,
+      description: fields.description.value.trim() || null,
+      event_date: eventDate.toISOString(),
+      image_url: imageUrl,
+      ticket_info: fields.ticketInfo.value.trim() || null,
+      published: fields.published.checked,
+    };
+
+    const previousImageUrl = editingId
+      ? (events.find((ev) => ev.id === editingId)?.image_url ?? null)
+      : null;
+
+    const { error } = editingId
+      ? await supabase.from('events').update(payload).eq('id', editingId)
+      : await supabase.from('events').insert(payload);
+
+    saveButton.disabled = false;
+    saveButton.textContent = editingId ? 'Guardar cambios' : 'Crear evento';
+
+    if (error) {
+      const hint =
+        error.code === '42501'
+          ? ' (no tenés permisos: ejecutá supabase-setup.sql en el editor SQL de Supabase)'
+          : '';
+      showFormError(`No se pudo guardar el evento: ${error.message}${hint}`);
+      return;
+    }
+
+    // Si cambió el flyer y el anterior era nuestro, lo borramos de Storage.
+    if (
+      editingId &&
+      previousImageUrl &&
+      previousImageUrl !== imageUrl &&
+      !isFlyerShared(previousImageUrl, editingId)
+    ) {
+      await removeFlyer(previousImageUrl);
+    }
+
+    dialog.close();
+    await loadEvents();
+    showStatus(editingId ? 'Evento actualizado.' : 'Evento creado.', 'ok');
+  });
+
+  // ---------- Inicio ----------
+
+  async function init() {
+    if (!isSupabaseConfigured) {
+      loadingView.classList.add('hidden');
+      configView.classList.add('flex');
+      configView.classList.remove('hidden');
+      configError.textContent = supabaseConfigError ?? 'Supabase no está configurado.';
+      return;
+    }
+
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      window.location.replace('/admin/login');
+      return;
+    }
+    await loadEvents();
+    loadingView.classList.add('hidden');
+    contentView.classList.remove('hidden');
+  }
+
+  void init();
 </script>

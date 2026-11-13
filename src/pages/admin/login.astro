@@ -3,106 +3,111 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 ---
 
 <AdminLayout title="Ingresar · La Pulpería MG">
-    <div class="flex flex-1 items-center justify-center">
-        <form
-            id="login-form"
-            class="w-full max-w-sm rounded-2xl border border-[#B45427]/50 bg-[#770a15] p-6 shadow-2xl sm:p-8"
-        >
-            <h1 class="text-center text-3xl sm:text-4xl">Panel de administración</h1>
-            <p class="mt-1 mb-6 text-center text-lg text-[#FBE9A5]/70">Ingresá para gestionar los eventos</p>
+  <div class="flex flex-1 items-center justify-center">
+    <form
+      id="login-form"
+      class="w-full max-w-sm rounded-2xl border border-[#B45427]/50 bg-[#770a15] p-6 shadow-2xl sm:p-8"
+    >
+      <h1 class="text-center text-3xl sm:text-4xl">Panel de administración</h1>
+      <p class="mt-1 mb-6 text-center text-lg text-[#FBE9A5]/70">
+        Ingresá para gestionar los eventos
+      </p>
 
-            <label for="email" class="mb-1 block text-xl">Email</label>
-            <input
-                id="email"
-                name="email"
-                type="email"
-                autocomplete="username"
-                required
-                placeholder="admin@ejemplo.com"
-                class="w-full rounded-lg border border-[#B45427]/50 bg-[#8A131F] px-3 py-2 text-xl text-[#FBE9A5] placeholder:text-[#FBE9A5]/40 focus:border-[#FBE9A5] focus:outline-none"
-            />
+      <label for="email" class="mb-1 block text-xl">
+        Email
+      </label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        autocomplete="username"
+        required
+        placeholder="admin@ejemplo.com"
+        class="w-full rounded-lg border border-[#B45427]/50 bg-[#8A131F] px-3 py-2 text-xl text-[#FBE9A5] placeholder:text-[#FBE9A5]/40 focus:border-[#FBE9A5] focus:outline-none"
+      />
 
-            <label for="password" class="mb-1 mt-4 block text-xl">Contraseña</label>
-            <input
-                id="password"
-                name="password"
-                type="password"
-                autocomplete="current-password"
-                required
-                placeholder="••••••••"
-                class="w-full rounded-lg border border-[#B45427]/50 bg-[#8A131F] px-3 py-2 text-xl text-[#FBE9A5] placeholder:text-[#FBE9A5]/40 focus:border-[#FBE9A5] focus:outline-none"
-            />
+      <label for="password" class="mb-1 mt-4 block text-xl">
+        Contraseña
+      </label>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        autocomplete="current-password"
+        required
+        placeholder="••••••••"
+        class="w-full rounded-lg border border-[#B45427]/50 bg-[#8A131F] px-3 py-2 text-xl text-[#FBE9A5] placeholder:text-[#FBE9A5]/40 focus:border-[#FBE9A5] focus:outline-none"
+      />
 
-            <p
-                id="login-error"
-                class="mb-4 mt-4 hidden rounded-lg border border-red-400/60 bg-red-950/40 px-3 py-2 text-lg text-red-200"
-            >
-            </p>
+      <p
+        id="login-error"
+        class="mb-4 mt-4 hidden rounded-lg border border-red-400/60 bg-red-950/40 px-3 py-2 text-lg text-red-200"
+      ></p>
 
-            <button
-                id="login-submit"
-                type="submit"
-                class="mt-2 w-full rounded-lg bg-[#31572A] px-4 py-3 text-2xl transition-colors duration-300 hover:bg-[#3f6b3f] disabled:opacity-60"
-            >
-                Ingresar
-            </button>
-        </form>
-    </div>
+      <button
+        id="login-submit"
+        type="submit"
+        class="mt-2 w-full rounded-lg bg-[#31572A] px-4 py-3 text-2xl transition-colors duration-300 hover:bg-[#3f6b3f] disabled:opacity-60"
+      >
+        Ingresar
+      </button>
+    </form>
+  </div>
 </AdminLayout>
 
 <script>
-    import { supabase, isSupabaseConfigured, supabaseConfigError } from '../../lib/supabase';
+  import { supabase, isSupabaseConfigured, supabaseConfigError } from '../../lib/supabase';
 
-    const form = document.querySelector<HTMLFormElement>('#login-form');
-    const errorBox = document.querySelector<HTMLElement>('#login-error');
-    const submitButton = document.querySelector<HTMLButtonElement>('#login-submit');
+  const form = document.querySelector<HTMLFormElement>('#login-form');
+  const errorBox = document.querySelector<HTMLElement>('#login-error');
+  const submitButton = document.querySelector<HTMLButtonElement>('#login-submit');
 
-    function showError(message: string) {
-        if (!errorBox) return;
-        errorBox.textContent = message;
+  function showError(message: string) {
+    if (!errorBox) return;
+    errorBox.textContent = message;
+    errorBox.classList.remove('hidden');
+  }
+
+  if (!isSupabaseConfigured) {
+    showError(supabaseConfigError ?? 'Supabase no está configurado.');
+    form?.querySelectorAll('input').forEach((input) => {
+      input.disabled = true;
+    });
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = 'Configuración incompleta';
+    }
+  } else {
+    // Si ya hay una sesión activa, ir directo al panel.
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) window.location.replace('/admin/');
+    });
+
+    form?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!form || !errorBox || !submitButton) return;
+
+      const email = (document.querySelector('#email') as HTMLInputElement).value.trim();
+      const password = (document.querySelector('#password') as HTMLInputElement).value;
+
+      errorBox.classList.add('hidden');
+      submitButton.disabled = true;
+      submitButton.textContent = 'Ingresando…';
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        errorBox.textContent =
+          error.message === 'Invalid login credentials'
+            ? 'Email o contraseña incorrectos.'
+            : `No se pudo iniciar sesión: ${error.message}`;
         errorBox.classList.remove('hidden');
-    }
+        submitButton.disabled = false;
+        submitButton.textContent = 'Ingresar';
+        return;
+      }
 
-    if (!isSupabaseConfigured) {
-        showError(supabaseConfigError ?? 'Supabase no está configurado.');
-        form?.querySelectorAll('input').forEach((input) => {
-            input.disabled = true;
-        });
-        if (submitButton) {
-            submitButton.disabled = true;
-            submitButton.textContent = 'Configuración incompleta';
-        }
-    } else {
-        // Si ya hay una sesión activa, ir directo al panel.
-        supabase.auth.getSession().then(({ data }) => {
-            if (data.session) window.location.replace('/admin/');
-        });
-
-        form?.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            if (!form || !errorBox || !submitButton) return;
-
-            const email = (document.querySelector('#email') as HTMLInputElement).value.trim();
-            const password = (document.querySelector('#password') as HTMLInputElement).value;
-
-            errorBox.classList.add('hidden');
-            submitButton.disabled = true;
-            submitButton.textContent = 'Ingresando…';
-
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-            if (error) {
-                errorBox.textContent =
-                    error.message === 'Invalid login credentials'
-                        ? 'Email o contraseña incorrectos.'
-                        : `No se pudo iniciar sesión: ${error.message}`;
-                errorBox.classList.remove('hidden');
-                submitButton.disabled = false;
-                submitButton.textContent = 'Ingresar';
-                return;
-            }
-
-            window.location.replace('/admin/');
-        });
-    }
+      window.location.replace('/admin/');
+    });
+  }
 </script>

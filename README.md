@@ -13,12 +13,12 @@ Demo: _pendiente de deploy_
 
 ## Arquitectura
 
-| Ruta | Renderizado | Motivo |
-|---|---|---|
-| `/`, `/carta`, `/fotos`, `/location` | Estático (prerender) | Contenido que cambia poco: máxima velocidad. |
-| `/eventos` | On-demand + **ISR (60 s)** | Lee de Supabase y se revalida cada minuto sin redeploy. |
-| `NextEvent` (home) | **Server island** (`server:defer`) | La home sigue estática y solo la tarjeta del próximo evento se pide aparte. |
-| `/admin`, `/admin/login` | Estático | Shell protegido por Supabase Auth; los datos, por RLS. |
+| Ruta                                 | Renderizado                        | Motivo                                                                      |
+| ------------------------------------ | ---------------------------------- | --------------------------------------------------------------------------- |
+| `/`, `/carta`, `/fotos`, `/location` | Estático (prerender)               | Contenido que cambia poco: máxima velocidad.                                |
+| `/eventos`                           | On-demand + **ISR (60 s)**         | Lee de Supabase y se revalida cada minuto sin redeploy.                     |
+| `NextEvent` (home)                   | **Server island** (`server:defer`) | La home sigue estática y solo la tarjeta del próximo evento se pide aparte. |
+| `/admin`, `/admin/login`             | Estático                           | Shell protegido por Supabase Auth; los datos, por RLS.                      |
 
 Decisiones y por qué: ver [`docs/arquitectura.md`](docs/arquitectura.md).
 
@@ -36,11 +36,11 @@ Queda en `http://localhost:4321`.
 
 ### Variables de entorno
 
-| Variable | Obligatoria | Descripción |
-|---|---|---|
-| `PUBLIC_SUPABASE_URL` | Sí | URL del proyecto Supabase. |
-| `PUBLIC_SUPABASE_ANON_KEY` | Sí | Clave pública (publishable). Es segura en el cliente: el acceso lo controla RLS. |
-| `SITE_URL` | No | Dominio público. Si no está, se usa el de `astro.config.mjs`. |
+| Variable                   | Obligatoria | Descripción                                                                      |
+| -------------------------- | ----------- | -------------------------------------------------------------------------------- |
+| `PUBLIC_SUPABASE_URL`      | Sí          | URL del proyecto Supabase.                                                       |
+| `PUBLIC_SUPABASE_ANON_KEY` | Sí          | Clave pública (publishable). Es segura en el cliente: el acceso lo controla RLS. |
+| `SITE_URL`                 | No          | Dominio público. Si no está, se usa el de `astro.config.mjs`.                    |
 
 ### Base de datos
 
@@ -48,12 +48,12 @@ Ejecutar [`supabase-setup.sql`](supabase-setup.sql) en el SQL Editor de Supabase
 
 ## Scripts
 
-| Comando | Acción |
-|---|---|
-| `npm run dev` | Servidor de desarrollo en `localhost:4321`. |
-| `npm run build` | Build de producción (`.vercel/output`). |
-| `npm run check` | Verificación de tipos (`astro check`). |
-| `npm run astro ...` | CLI de Astro. |
+| Comando             | Acción                                      |
+| ------------------- | ------------------------------------------- |
+| `npm run dev`       | Servidor de desarrollo en `localhost:4321`. |
+| `npm run build`     | Build de producción (`.vercel/output`).     |
+| `npm run check`     | Verificación de tipos (`astro check`).      |
+| `npm run astro ...` | CLI de Astro.                               |
 
 ## Estructura
 

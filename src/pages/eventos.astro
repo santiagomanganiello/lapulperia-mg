@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import { supabase } from "../lib/supabase";
-import { formatEventDate } from "../lib/events";
+import { formatEventDate, relativeDayLabel } from "../lib/events";
 import Layout from "../layouts/Layout.astro";
 
 type EventRow = {
@@ -25,33 +25,30 @@ const { data, error } = await supabase
 
 const events = (data as EventRow[] | null) ?? [];
 
-const now = Date.now();
 const eventsWithMeta = events.map((event) => ({
   ...event,
   ...formatEventDate(event.event_date),
-  isPast: new Date(event.event_date).getTime() < now,
+  relative: relativeDayLabel(event.event_date),
 }));
 ---
 
-<Layout title="Eventos en La Pulpería MG">
-  <main class="flex-1 px-4 py-8 sm:px-8">
+<Layout
+  title="Eventos"
+  description="Agenda de eventos y música en vivo en La Pulpería MG, Monte Grande."
+>
+  <div class="flex-1 px-4 py-8 sm:px-8">
     <h1 class="mb-6 text-center text-3xl text-[#FBE9A5] sm:text-4xl">Próximos eventos</h1>
 
     {error && (
       <p class="mx-auto mb-6 max-w-xl rounded-lg border border-red-400/60 bg-red-950/40 px-4 py-3 text-lg text-red-200">
-        Error al cargar los eventos: {error.message}
+        No pudimos cargar la agenda en este momento. Probá de nuevo en unos minutos.
       </p>
     )}
 
     {eventsWithMeta.length > 0 ? (
       <div class="mx-auto grid max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {eventsWithMeta.map((event) => (
-          <article
-            class:list={[
-              "flex flex-col overflow-hidden rounded-2xl border border-[#B45427]/50 bg-[#770a15]",
-              event.isPast && "opacity-60",
-            ]}
-          >
+          <article class="flex flex-col overflow-hidden rounded-2xl border border-[#B45427]/50 bg-[#770a15]">
             {event.image_url ? (
               <img
                 src={event.image_url}
@@ -68,14 +65,9 @@ const eventsWithMeta = events.map((event) => ({
             <div class="flex flex-1 flex-col gap-3 p-4">
               <div class="flex flex-wrap items-center gap-2">
                 <h2 class="text-2xl text-[#FBE9A5]">{event.title}</h2>
-                {!event.published && (
-                  <span class="rounded-full bg-[#B45427]/40 px-2.5 py-0.5 text-sm text-[#FBE9A5]">
-                    Borrador
-                  </span>
-                )}
-                {event.isPast && (
-                  <span class="rounded-full bg-black/30 px-2.5 py-0.5 text-sm text-[#FBE9A5]/70">
-                    Pasado
+                {event.relative && (
+                  <span class="rounded-full bg-[#31572A] px-2.5 py-0.5 text-sm text-[#FBE9A5]">
+                    {event.relative}
                   </span>
                 )}
               </div>
@@ -96,16 +88,31 @@ const eventsWithMeta = events.map((event) => ({
               )}
 
               {event.ticket_info && (
-                <p class="mt-auto rounded-lg border border-[#31572A] bg-[#31572A]/30 px-3 py-2 text-lg text-[#FBE9A5]/85">
+                <p class="rounded-lg border border-[#31572A] bg-[#31572A]/30 px-3 py-2 text-lg text-[#FBE9A5]/85">
                   <span aria-hidden="true">🎟️</span> {event.ticket_info}
                 </p>
               )}
+
+              <a
+                href={`/eventos/${event.id}.ics`}
+                class="mt-auto inline-flex w-fit items-center gap-2 rounded-lg border border-[#B45427]/60 px-3 py-2 text-lg text-[#FBE9A5]/80 transition-colors hover:bg-[#31572A]/40 hover:text-[#FBE9A5]"
+              >
+                <span aria-hidden="true">📆</span>
+                Agregar al calendario
+              </a>
             </div>
           </article>
         ))}
       </div>
     ) : (
-      !error && <p class="text-center text-xl text-[#FBE9A5]/70">No hay eventos cargados todavía.</p>
+      !error && (
+        <div class="mx-auto max-w-xl rounded-2xl border border-dashed border-[#B45427]/60 bg-[#770a15]/60 px-6 py-10 text-center">
+          <p class="text-2xl text-[#FBE9A5]">No hay fechas programadas por ahora.</p>
+          <p class="mt-2 text-lg text-[#FBE9A5]/70">
+            Seguinos para enterarte de las próximas noches.
+          </p>
+        </div>
+      )
     )}
-  </main>
+  </div>
 </Layout>

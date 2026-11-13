@@ -1,6 +1,6 @@
 ---
 import { supabase } from '../lib/supabase';
-import { formatEventDate } from '../lib/events';
+import { formatEventDate, relativeDayLabel } from '../lib/events';
 
 type NextEventRow = {
   id: string;
@@ -30,6 +30,7 @@ try {
 }
 
 const fecha = event ? formatEventDate(event.event_date) : null;
+const relative = event ? relativeDayLabel(event.event_date) : null;
 
 // Cacheamos la isla 60 s en el CDN para no pegarle a Supabase en cada visita.
 Astro.response.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
@@ -38,12 +39,14 @@ Astro.response.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate
 {event && fecha ? (
   <article class="overflow-hidden rounded-2xl border border-[#B45427]/50 bg-[#770a15] shadow-2xl sm:flex">
     {event.image_url ? (
-      <img
-        src={event.image_url}
-        alt={`Flyer de ${event.title}`}
-        loading="lazy"
-        class="h-64 w-full object-cover sm:h-auto sm:w-64 sm:shrink-0"
-      />
+      <div class="h-64 w-full shrink-0 sm:h-auto sm:w-64">
+        <img
+          src={event.image_url}
+          alt={`Flyer de ${event.title}`}
+          loading="lazy"
+          class="h-full w-full object-cover"
+        />
+      </div>
     ) : (
       <div
         class="flex h-48 w-full items-center justify-center bg-black/20 text-6xl text-[#FBE9A5]/30 sm:h-auto sm:w-64 sm:shrink-0"
@@ -54,10 +57,17 @@ Astro.response.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate
     )}
 
     <div class="flex flex-1 flex-col gap-3 p-5 sm:p-6">
-      <p class="text-lg text-[#FBE9A5]/70">
-        📅 {fecha.fecha}
-        {fecha.hora && <span class="text-[#FBE9A5]/50"> · {fecha.hora}</span>}
-      </p>
+      <div class="flex flex-wrap items-center gap-2">
+        {relative && (
+          <span class="rounded-full bg-[#31572A] px-2.5 py-0.5 text-base text-[#FBE9A5]">
+            {relative}
+          </span>
+        )}
+        <p class="text-lg text-[#FBE9A5]/70">
+          📅 {fecha.fecha}
+          {fecha.hora && <span class="text-[#FBE9A5]/50"> · {fecha.hora}</span>}
+        </p>
+      </div>
 
       <h3 class="text-3xl leading-tight text-[#FBE9A5] sm:text-4xl">{event.title}</h3>
 
@@ -69,12 +79,21 @@ Astro.response.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate
         </p>
       )}
 
-      <a
-        href="/eventos"
-        class="mt-auto inline-block text-lg text-[#FBE9A5]/70 underline-offset-4 transition-colors hover:text-[#FBE9A5] hover:underline"
-      >
-        Ver todos los eventos →
-      </a>
+      <div class="mt-auto flex flex-wrap items-center gap-x-5 gap-y-2 pt-2">
+        <a
+          href="/eventos"
+          class="text-lg text-[#FBE9A5]/70 underline-offset-4 transition-colors hover:text-[#FBE9A5] hover:underline"
+        >
+          Ver todos los eventos →
+        </a>
+        <a
+          href={`/eventos/${event.id}.ics`}
+          class="inline-flex items-center gap-2 text-lg text-[#FBE9A5]/60 underline-offset-4 transition-colors hover:text-[#FBE9A5] hover:underline"
+        >
+          <span aria-hidden="true">📆</span>
+          Agregar al calendario
+        </a>
+      </div>
     </div>
   </article>
 ) : (

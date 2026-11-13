@@ -31,3 +31,6 @@ Thumbs.db
 coverage/
 playwright-report/
 test-results/
+
+# instrucciones locales para agentes
+AGENTS.md

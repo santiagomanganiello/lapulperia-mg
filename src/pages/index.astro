@@ -2,9 +2,12 @@
 import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 import NextEvent from '../components/NextEvent.astro';
+import Hours from '../components/Hours.astro';
+import { WHATSAPP_URL } from '../lib/site';
 import foto1 from '../assets/pulpe/pulpe-1.webp';
 import foto2 from '../assets/pulpe/pulpe-2.webp';
 import foto3 from '../assets/pulpe/pulpe-6.webp';
+import heroFoto from '../assets/pulpe/pulpe-7.webp';
 
 const teaser = [foto1, foto2, foto3];
 
@@ -28,7 +31,7 @@ const accesos = [
     icono: '📸',
   },
   {
-    href: 'https://www.google.com/maps?cid=15119335724706526737&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF',
+    href: '/location',
     titulo: 'Ubicación',
     texto: 'Av. Dardo Rocha 396.',
     icono: '📍',
@@ -36,18 +39,36 @@ const accesos = [
 ];
 ---
 
-<Layout title="La Pulpería - MG">
+<Layout title="La Pulpería MG">
   <div class="flex w-full flex-1 flex-col items-center">
     <!-- Hero -->
-    <section class="w-full">
-      <div class="mx-auto flex max-w-5xl flex-col items-start gap-6 px-4 py-12 sm:px-8 sm:py-20">
-        <span class="rounded-full border border-[#B45427]/60 bg-black/20 px-4 py-1.5 text-lg tracking-wide text-[#FBE9A5]/80">
+    <section class="relative w-full overflow-hidden border-b border-[#B45427]/30">
+      <Image
+        src={heroFoto}
+        alt=""
+        widths={[800, 1200, 1600]}
+        sizes="100vw"
+        format="webp"
+        quality={76}
+        loading="eager"
+        fetchpriority="high"
+        class="absolute inset-0 h-full w-full object-cover"
+      />
+
+      <div
+        class="absolute inset-0 bg-gradient-to-r from-[#8A131F] via-[#8A131F]/90 to-[#8A131F]/40"
+        aria-hidden="true"
+      >
+      </div>
+
+      <div class="relative mx-auto flex max-w-5xl flex-col items-start gap-6 px-4 py-14 sm:px-8 sm:py-24">
+        <span class="rounded-full border border-[#B45427]/60 bg-black/25 px-4 py-1.5 text-lg tracking-wide text-[#FBE9A5]/80">
           Bar · Música en vivo · Eventos
         </span>
 
-        <h1 class="text-5xl leading-[0.95] text-[#FBE9A5] sm:text-7xl">La Pulpería - Monte Grande</h1>
+        <h1 class="text-5xl leading-[0.95] text-[#FBE9A5] sm:text-7xl">La Pulpería MG</h1>
 
-        <p class="max-w-2xl text-xl leading-relaxed text-[#FBE9A5]/80 sm:text-2xl">
+        <p class="max-w-2xl text-xl leading-relaxed text-[#FBE9A5]/85 sm:text-2xl">
           Un bar de barrio para encontrarse, escuchar buena música y estirar la noche.
         </p>
 
@@ -59,32 +80,24 @@ const accesos = [
             Ver próximos eventos
           </a>
           <a
-            href="/carta"
-            class="rounded-lg border border-[#B45427]/60 px-6 py-3 text-xl text-[#FBE9A5] transition-colors duration-300 hover:bg-[#770a15]"
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="rounded-lg border border-[#B45427]/70 bg-black/20 px-6 py-3 text-xl text-[#FBE9A5] transition-colors duration-300 hover:bg-[#770a15]"
           >
-          Ver la carta
+            Pedir por WhatsApp
           </a>
         </div>
-        <div class="flex flex-wrap gap-3">
-          <a 
-            href="https://www.instagram.com/lapulperiamg/"
-            class="rounded-lg bg-pink-600 px-6 py-3 text-xl text-[#FBE9A5] transition-colors duration-300 hover:bg-pink-500"
-            target="_blank"
-          >
-          Instagram
-          </a>
-          <a 
-            href="https://wa.link/ek6blk"
-            class="rounded-lg bg-[#31572A] px-6 py-3 text-xl text-[#FBE9A5] transition-colors duration-300 hover:bg-[#3f6b3f]"
-          >
-          Delivery
-          </a>
-        </div>  
+
+        <div class="mt-2 w-full max-w-sm rounded-xl border border-[#B45427]/40 bg-black/30 p-4 backdrop-blur-sm">
+          <p class="mb-2 text-lg text-[#FBE9A5]">Horarios</p>
+          <Hours compact />
+        </div>
       </div>
     </section>
 
     <!-- Próximo evento (server island: la home queda estática y esto se mantiene fresco) -->
-    <section class="mx-auto w-full max-w-5xl px-4 pb-12 sm:px-8">
+    <section class="mx-auto w-full max-w-5xl px-4 pb-12 pt-10 sm:px-8">
       <div class="mb-4 flex items-end justify-between gap-4">
         <h2 class="text-3xl text-[#FBE9A5] sm:text-4xl">Próximo evento</h2>
         <a
@@ -115,7 +128,7 @@ const accesos = [
             class="group flex items-center gap-4 rounded-2xl border border-[#B45427]/50 bg-[#770a15] p-5 transition-colors duration-300 hover:border-[#FBE9A5]/30 hover:bg-[#31572A]/40"
           >
             <span
-              class="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-[#FBE9A5]/70 text-2xl"
+              class="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-[#31572A]/50 text-2xl"
               aria-hidden="true"
             >
               {acceso.icono}
@@ -138,7 +151,7 @@ const accesos = [
     <!-- Galería teaser -->
     <section class="mx-auto w-full max-w-5xl px-4 pb-16 sm:px-8">
       <div class="mb-4 flex items-end justify-between gap-4">
-        <h2 class="text-3xl text-[#FBE9A5] sm:text-4xl">Fotos de la pulpe</h2>
+        <h2 class="text-3xl text-[#FBE9A5] sm:text-4xl">Un poco del lugar</h2>
         <a
           href="/fotos"
           class="shrink-0 text-lg text-[#FBE9A5]/70 transition-colors hover:text-[#FBE9A5]"
@@ -148,12 +161,8 @@ const accesos = [
       </div>
 
       <div class="grid grid-cols-3 gap-2 sm:gap-3">
-        {teaser.map((foto, i) => (
-          <a
-            href="/fotos"
-            class="group overflow-hidden rounded-xl border border-[#B45427]/40"
-            aria-label={`Ver todas las fotos (${i + 1})`}
-          >
+        {teaser.map((foto) => (
+          <a href="/fotos" class="group overflow-hidden rounded-xl border border-[#B45427]/40">
             <Image
               src={foto}
               alt=""
@@ -163,7 +172,7 @@ const accesos = [
               format="webp"
               quality={80}
               loading="lazy"
-              class="aspect-4/5 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              class="aspect-[4/5] h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           </a>
         ))}

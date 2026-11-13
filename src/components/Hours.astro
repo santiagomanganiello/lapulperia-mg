@@ -1,0 +1,45 @@
+---
+interface Props {
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+import { HOURS_GROUPS } from '../lib/hours';
+---
+
+<div class:list={['flex flex-col gap-3', compact ? '' : 'sm:gap-4']}>
+  <p
+    data-open-status
+    class="hidden w-fit rounded-full border px-3 py-1 text-base data-[state=open]:border-[#31572A] data-[state=open]:bg-[#31572A]/40 data-[state=open]:text-[#FBE9A5] data-[state=closed]:border-[#B45427]/60 data-[state=closed]:bg-black/20 data-[state=closed]:text-[#FBE9A5]/70"
+  >
+  </p>
+
+  <dl class="flex flex-col gap-1.5 text-lg">
+    {HOURS_GROUPS.map((group) => (
+      <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
+        <dt class="text-[#FBE9A5]/70">{group.days}</dt>
+        <dd class="text-[#FBE9A5]">
+          {group.from ? `${group.from} a ${group.to}` : 'Cerrado'}
+        </dd>
+      </div>
+    ))}
+  </dl>
+</div>
+
+<script>
+  import { getStatus, describeStatus } from '../lib/hours';
+
+  function updateStatus() {
+    const status = getStatus();
+
+    document.querySelectorAll<HTMLElement>('[data-open-status]').forEach((el) => {
+      el.textContent = describeStatus(status);
+      el.dataset.state = status.open ? 'open' : 'closed';
+      el.classList.remove('hidden');
+    });
+  }
+
+  updateStatus();
+  // El estado cambia con el paso del tiempo: se recalcula sin recargar.
+  setInterval(updateStatus, 60_000);
+</script>

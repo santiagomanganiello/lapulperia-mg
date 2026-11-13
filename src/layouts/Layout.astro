@@ -1,36 +1,132 @@
 ---
 import '../styles/global.css';
-const { title } = Astro.props;
 import NavBar from '../components/NavBar.astro';
-import Location from '../components/Location.astro';
+import Footer from '../components/Footer.astro';
+import { SITE, WHATSAPP_URL, MAPS_URL } from '../lib/site';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = SITE.description } = Astro.props;
+
+const base = Astro.site ?? new URL('https://lapulperia-mg.vercel.app');
+const canonical = new URL(Astro.url.pathname, base);
+const ogImage = new URL('/og.jpg', base);
+const pageTitle = title.includes(SITE.name) ? title : `${title} · ${SITE.name}`;
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'BarOrPub',
+  name: SITE.name,
+  description,
+  url: base.href,
+  image: ogImage.href,
+  telephone: `+${SITE.whatsapp.number}`,
+  hasMap: MAPS_URL,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: SITE.address.street,
+    addressLocality: SITE.address.locality,
+    addressRegion: SITE.address.region,
+    addressCountry: SITE.address.country,
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: SITE.geo.lat,
+    longitude: SITE.geo.lng,
+  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Wednesday', 'Sunday'],
+      opens: '17:00',
+      closes: '02:00',
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Thursday', 'Friday', 'Saturday'],
+      opens: '12:00',
+      closes: '03:00',
+    },
+  ],
+  ...(SITE.social.instagram ? { sameAs: [SITE.social.instagram] } : {}),
+};
 ---
 
 <!doctype html>
 <html lang="es">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
-	</head>
-	<body class="bg-[#8A131F] flex flex-col md:flex-row">
-		<NavBar />
-		<slot />
-		<footer></footer>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.href} />
+    <meta name="theme-color" content="#8A131F" />
 
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta property="og:image" content={ogImage.href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={SITE.name} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage.href} />
+
+    <meta name="generator" content={Astro.generator} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  </head>
+  <body class="flex flex-col bg-[#8A131F] md:flex-row">
+    <a
+      href="#contenido"
+      class="sr-only z-[100] rounded-lg bg-[#FBE9A5] px-4 py-2 text-lg text-[#8A131F] focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+    >
+      Saltar al contenido
+    </a>
+
+    <NavBar />
+
+    <div class="flex min-w-0 flex-1 flex-col">
+      <main id="contenido" class="flex flex-1 flex-col">
+        <slot />
+      </main>
+
+      <Footer />
+    </div>
+
+    <a
+      href={WHATSAPP_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Pedir por WhatsApp"
+      class="fixed bottom-4 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#31572A] text-2xl text-[#FBE9A5] shadow-lg transition-transform duration-300 hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FBE9A5] md:hidden"
+    >
+      <span aria-hidden="true">💬</span>
+    </a>
+  </body>
 </html>
 
 <style>
-	html {
-		height: 100%;
-	}
+  html {
+    height: 100%;
+  }
 
-	body {
-		margin: 0;
-		width: 100%;
-		min-height: 100%;
-	}
+  body {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+  }
 </style>

@@ -1,0 +1,83 @@
+---
+import Hours from './Hours.astro';
+import { SITE, WHATSAPP_URL, MAPS_URL, ADDRESS_LINE } from '../lib/site';
+
+const links = [
+  { href: '/eventos', label: 'Eventos' },
+  { href: '/carta', label: 'Carta' },
+  { href: '/fotos', label: 'Fotos' },
+  { href: '/location', label: 'Ubicación' },
+];
+
+const year = new Date().getFullYear();
+---
+
+<footer class="shrink-0 border-t border-[#B45427]/40 bg-[#770a15] px-4 py-10 sm:px-8">
+  <div class="mx-auto grid max-w-5xl gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="flex flex-col gap-3">
+      <p class="text-3xl text-[#FBE9A5]">{SITE.name}</p>
+      <p class="text-lg text-[#FBE9A5]/70">{SITE.tagline}</p>
+
+      <a
+        href={WHATSAPP_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mt-1 inline-flex w-fit items-center gap-2 rounded-lg bg-[#31572A] px-4 py-2 text-lg text-[#FBE9A5] transition-colors duration-300 hover:bg-[#3f6b3f]"
+      >
+        <span aria-hidden="true">💬</span>
+        Pedir por WhatsApp
+      </a>
+
+      {SITE.social.instagram && (
+        <a
+          href={SITE.social.instagram}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="w-fit text-lg text-[#FBE9A5]/70 underline-offset-4 transition-colors hover:text-[#FBE9A5] hover:underline"
+        >
+          Instagram
+        </a>
+      )}
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <p class="text-xl text-[#FBE9A5]">Dónde estamos</p>
+      <address class="not-italic text-lg leading-relaxed text-[#FBE9A5]/70">
+        {ADDRESS_LINE}
+      </address>
+      <a
+        href={MAPS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="w-fit text-lg text-[#FBE9A5]/70 underline-offset-4 transition-colors hover:text-[#FBE9A5] hover:underline"
+      >
+        Cómo llegar →
+      </a>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <p class="text-xl text-[#FBE9A5]">Horarios</p>
+      <Hours compact />
+    </div>
+
+    <nav aria-label="Secciones" class="flex flex-col gap-2">
+      <p class="text-xl text-[#FBE9A5]">Secciones</p>
+      <ul class="flex flex-col gap-1 text-lg">
+        {links.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class="text-[#FBE9A5]/70 underline-offset-4 transition-colors hover:text-[#FBE9A5] hover:underline"
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  <p class="mx-auto mt-8 max-w-5xl border-t border-[#B45427]/30 pt-6 text-center text-base text-[#FBE9A5]/50">
+    © {year} {SITE.name}
+  </p>
+</footer>

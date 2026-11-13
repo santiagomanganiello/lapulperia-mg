@@ -24,6 +24,8 @@ Demo: [lapulperia-mg.vercel.app](https://lapulperia-mg.vercel.app/)
 
 Decisiones y por qué: ver [`docs/arquitectura.md`](docs/arquitectura.md).
 
+Bitácora del proyecto (fase 0 a 3.5, con conceptos clave): [`docs/bitacora.md`](docs/bitacora.md) · [PDF](docs/bitacora.pdf).
+
 ## Cómo correrlo
 
 ```bash

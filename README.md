@@ -2,7 +2,7 @@
 
 Sitio web del bar **La Pulpería MG**: carta, agenda de eventos, fotos y ubicación, con un panel de administración para publicar fechas sin tocar código.
 
-Demo: _pendiente de deploy_
+Demo: [lapulperia-mg.vercel.app](https://lapulperia-mg.vercel.app/)
 
 ## Stack
 
@@ -48,12 +48,16 @@ Ejecutar [`supabase-setup.sql`](supabase-setup.sql) en el SQL Editor de Supabase
 
 ## Scripts
 
-| Comando             | Acción                                      |
-| ------------------- | ------------------------------------------- |
-| `npm run dev`       | Servidor de desarrollo en `localhost:4321`. |
-| `npm run build`     | Build de producción (`.vercel/output`).     |
-| `npm run check`     | Verificación de tipos (`astro check`).      |
-| `npm run astro ...` | CLI de Astro.                               |
+| Comando                | Acción                                      |
+| ---------------------- | ------------------------------------------- |
+| `npm run dev`          | Servidor de desarrollo en `localhost:4321`. |
+| `npm run build`        | Build de producción (`.vercel/output`).     |
+| `npm run check`        | Verificación de tipos (`astro check`).      |
+| `npm run lint`         | ESLint (TypeScript + Astro).                |
+| `npm run lint:fix`     | ESLint con corrección automática.           |
+| `npm run format`       | Prettier sobre todo el repo.                |
+| `npm run format:check` | Verifica el formato sin escribir.           |
+| `npm run astro ...`    | CLI de Astro.                               |
 
 ## Estructura
 

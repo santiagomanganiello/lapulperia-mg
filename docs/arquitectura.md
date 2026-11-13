@@ -38,6 +38,18 @@ Con eso, el panel puede ser 100 % cliente sin necesidad de una API intermedia ni
 
 Las fechas se guardan en UTC y se muestran siempre en `America/Argentina/Buenos_Aires`. El formateo vive en un único módulo (`src/lib/events.ts`) para que la web pública, la isla y la agenda no se desincronicen.
 
+## Calidad de código
+
+El repo se mantiene con tres chequeos que no dependen de mirar la pantalla:
+
+| Comando                | Qué cubre                                                           |
+| ---------------------- | ------------------------------------------------------------------- |
+| `npm run check`        | Tipos de TypeScript y componentes Astro (`astro check`).            |
+| `npm run lint`         | ESLint con reglas de TypeScript, Astro y accesibilidad recomendada. |
+| `npm run format:check` | Que todo el repo respete Prettier (sin reescribir archivos).        |
+
+Prettier y ESLint no se pisan: `eslint-config-prettier` apaga las reglas de estilo de ESLint y el formato queda en un solo lugar. `.editorconfig` fija LF, UTF-8 y 2 espacios para que el editor no introduzca diferencias.
+
 ## Limitaciones conocidas
 
 - **Sin backend para el panel**: la protección es RLS + `noindex`. Es adecuado para este caso, pero no reemplaza una sesión verificada del lado del servidor.

@@ -1,5 +1,7 @@
 # La Pulpería MG
 
+[![CI](https://github.com/santiagomanganiello/lapulperia-mg/actions/workflows/ci.yml/badge.svg)](https://github.com/santiagomanganiello/lapulperia-mg/actions/workflows/ci.yml)
+
 Sitio web del bar **La Pulpería MG**: carta, agenda de eventos, fotos y ubicación, con un panel de administración para publicar fechas sin tocar código.
 
 Demo: [lapulperia-mg.vercel.app](https://lapulperia-mg.vercel.app/)
@@ -72,6 +74,16 @@ Los tests cubren la lógica que no se ve en pantalla y que es fácil de romper:
 | `tests/calendar.test.ts` | Generación del `.ics`: fechas UTC, duración, escapado y composición del texto. |
 
 No se testean los textos ni el HTML: cambian seguido y no aportan señal.
+
+### Integración continua
+
+Cada push a `main` y cada pull request (incluidos los de Dependabot) corren en GitHub Actions:
+
+```
+npm ci → check → lint → format:check → test → build
+```
+
+El workflow está en [`.github/workflows/ci.yml`](.github/workflows/ci.yml) y no necesita secretos: el build funciona aunque falten las variables de Supabase (el sitio degrada a agenda vacía).
 
 ## Estructura
 

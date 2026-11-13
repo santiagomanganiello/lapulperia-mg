@@ -1,0 +1,13 @@
+# Normalizar finales de línea (repo multiplataforma: Windows + Vercel)
+* text=auto eol=lf
+
+# Binarios
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.ttf binary
+*.woff binary
+*.woff2 binary

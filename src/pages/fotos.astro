@@ -1,0 +1,24 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PhotoGallery from '../components/PhotoGallery.astro';
+import foto1 from '../assets/pulpe/pulpe-1.webp';
+import foto2 from '../assets/pulpe/pulpe-2.webp';
+import foto3 from '../assets/pulpe/pulpe-3.webp';
+import foto4 from '../assets/pulpe/pulpe-4.webp';
+import foto5 from '../assets/pulpe/pulpe-5.webp';
+import foto6 from '../assets/pulpe/pulpe-6.webp';
+import foto7 from '../assets/pulpe/pulpe-7.webp';
+
+const fotos = [foto1, foto2, foto3, foto4, foto5, foto7, foto6];
+---
+
+<Layout title="Fotos · La Pulpería MG">
+  <div class="flex w-full flex-1 flex-col items-center">
+    <header class="w-full max-w-6xl px-4 pb-2 pt-10 text-center sm:px-6 sm:pt-14">
+      <h1 class="text-4xl text-[#FBE9A5] sm:text-5xl">Fotos</h1>
+      <p class="mt-2 text-xl text-[#FBE9A5]/70">Un poco de lo que se vive en La Pulpería MG.</p>
+    </header>
+
+    <PhotoGallery imagenes={fotos} alt="La Pulpería MG" />
+  </div>
+</Layout>

@@ -1,0 +1,167 @@
+---
+import { Image, getImage } from 'astro:assets';
+
+interface Props {
+  imagenes: ImageMetadata[];
+  alt?: string;
+}
+
+const { imagenes, alt = 'Foto de La Pulpería MG' } = Astro.props;
+const total = imagenes.length;
+
+// Versión grande optimizada para el lightbox: evita abrir el archivo original.
+const grandes = await Promise.all(
+  imagenes.map((imagen) =>
+    getImage({
+      src: imagen,
+      width: 1400,
+      format: 'webp',
+      quality: 72,
+    })
+  )
+);
+---
+
+<section class="w-full px-4 pb-16 sm:px-6" data-galeria>
+  <div class="mx-auto max-w-6xl columns-2 gap-3 sm:gap-4 md:columns-3">
+    {imagenes.map((imagen, i) => (
+      <button
+        type="button"
+        data-foto
+        data-full={grandes[i].src}
+        aria-label={`Ampliar foto ${i + 1} de ${total}`}
+        class="group mb-3 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-xl border border-[#B45427]/40 bg-black/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FBE9A5] sm:mb-4"
+      >
+        <Image
+          src={imagen}
+          alt={`${alt} ${i + 1}`}
+          width={800}
+          widths={[480, 800]}
+          sizes="(min-width: 768px) 30vw, 45vw"
+          format="webp"
+          quality={78}
+          loading={i < 2 ? 'eager' : 'lazy'}
+          class="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+        />
+      </button>
+    ))}
+  </div>
+
+  <dialog
+    data-lightbox
+    class="m-auto max-h-none w-auto max-w-none overflow-visible border-0 bg-transparent p-0"
+  >
+    <div class="relative">
+      <img
+        data-lightbox-img
+        alt=""
+        class="max-h-[90dvh] w-auto max-w-[94vw] rounded-xl object-contain"
+      />
+
+      <button
+        type="button"
+        data-close
+        aria-label="Cerrar"
+        class="absolute right-2 top-2 grid h-10 w-10 place-items-center rounded-full bg-black/70 text-2xl leading-none text-white transition hover:bg-black focus-visible:outline-2 focus-visible:outline-[#FBE9A5]"
+      >
+        ×
+      </button>
+
+      <button
+        type="button"
+        data-prev
+        aria-label="Foto anterior"
+        class="absolute left-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white backdrop-blur transition hover:bg-black/80 focus-visible:outline-2 focus-visible:outline-[#FBE9A5] disabled:pointer-events-none disabled:opacity-0"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        data-next
+        aria-label="Foto siguiente"
+        class="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white backdrop-blur transition hover:bg-black/80 focus-visible:outline-2 focus-visible:outline-[#FBE9A5] disabled:pointer-events-none disabled:opacity-0"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+      </button>
+
+      <p
+        data-contador
+        class="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-base text-white/90 backdrop-blur"
+      ></p>
+    </div>
+  </dialog>
+</section>
+
+<style>
+  [data-lightbox]::backdrop {
+    background: rgba(0, 0, 0, 0.92);
+  }
+</style>
+
+<script>
+  function iniciarGaleria(root: HTMLElement) {
+    const fotos = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-foto]'));
+    const lightbox = root.querySelector<HTMLDialogElement>('[data-lightbox]');
+    const imagen = root.querySelector<HTMLImageElement>('[data-lightbox-img]');
+    const contador = root.querySelector<HTMLElement>('[data-contador]');
+    const prev = root.querySelector<HTMLButtonElement>('[data-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-next]');
+    const cerrar = root.querySelector<HTMLButtonElement>('[data-close]');
+    const total = fotos.length;
+    let actual = 0;
+
+    function render() {
+      const foto = fotos[actual];
+      if (!foto || !imagen) return;
+
+      imagen.src = foto.dataset.full ?? '';
+      imagen.alt = foto.querySelector('img')?.alt ?? '';
+      if (contador) contador.textContent = `${actual + 1} / ${total}`;
+      if (prev) prev.disabled = actual === 0;
+      if (next) next.disabled = actual === total - 1;
+    }
+
+    function ir(indice: number) {
+      const destino = Math.min(Math.max(indice, 0), total - 1);
+      if (destino === actual) return;
+      actual = destino;
+      render();
+    }
+
+    fotos.forEach((foto, i) => {
+      foto.addEventListener('click', () => {
+        actual = i;
+        render();
+        lightbox?.showModal();
+      });
+    });
+
+    prev?.addEventListener('click', () => ir(actual - 1));
+    next?.addEventListener('click', () => ir(actual + 1));
+    cerrar?.addEventListener('click', () => lightbox?.close());
+
+    lightbox?.addEventListener('click', (event) => {
+      if (event.target === lightbox) lightbox.close();
+    });
+
+    lightbox?.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        ir(actual - 1);
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        ir(actual + 1);
+      }
+    });
+
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-galeria]').forEach(iniciarGaleria);
+</script>

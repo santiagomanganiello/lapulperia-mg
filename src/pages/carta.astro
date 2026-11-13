@@ -1,0 +1,19 @@
+---
+import Layout from "../layouts/Layout.astro";
+import CataVirtual from '../components/CartaVirtual.astro';
+import page1 from '../assets/carta-virtual/menu-1.jpg';
+import page2 from '../assets/carta-virtual/menu-2.jpg';
+import page3 from '../assets/carta-virtual/menu-3.jpg';
+import page4 from '../assets/carta-virtual/menu-4.jpg';
+import page5 from '../assets/carta-virtual/menu-5.jpg';
+import page6 from '../assets/carta-virtual/menu-6.jpg';
+
+const menuImages = [page1, page2, page3, page4, page5, page6];
+---
+
+<Layout title="Carta · La Pulpería MG">
+  <div class="flex w-full flex-1 flex-col items-center mt-5">
+    <h1 class="sr-only">Carta de La Pulpería MG</h1>
+    <CataVirtual imagenes={menuImages} alt="Carta de La Pulpería MG, página" />
+  </div>
+</Layout>

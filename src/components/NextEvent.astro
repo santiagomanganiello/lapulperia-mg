@@ -1,0 +1,91 @@
+---
+import { supabase } from '../lib/supabase';
+import { formatEventDate } from '../lib/events';
+
+type NextEventRow = {
+  id: string;
+  title: string;
+  artist: string | null;
+  event_date: string;
+  image_url: string | null;
+  ticket_info: string | null;
+};
+
+let event: NextEventRow | null = null;
+
+try {
+  const { data } = await supabase
+    .from('events')
+    .select('id, title, artist, event_date, image_url, ticket_info')
+    .eq('published', true)
+    .gte('event_date', new Date().toISOString())
+    .order('event_date', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  event = (data as NextEventRow | null) ?? null;
+} catch {
+  // Si Supabase no responde, la home sigue funcionando sin la tarjeta.
+  event = null;
+}
+
+const fecha = event ? formatEventDate(event.event_date) : null;
+
+// Cacheamos la isla 60 s en el CDN para no pegarle a Supabase en cada visita.
+Astro.response.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+---
+
+{event && fecha ? (
+  <article class="overflow-hidden rounded-2xl border border-[#B45427]/50 bg-[#770a15] shadow-2xl sm:flex">
+    {event.image_url ? (
+      <img
+        src={event.image_url}
+        alt={`Flyer de ${event.title}`}
+        loading="lazy"
+        class="h-64 w-full object-cover sm:h-auto sm:w-64 sm:shrink-0"
+      />
+    ) : (
+      <div
+        class="flex h-48 w-full items-center justify-center bg-black/20 text-6xl text-[#FBE9A5]/30 sm:h-auto sm:w-64 sm:shrink-0"
+        aria-hidden="true"
+      >
+        🎸
+      </div>
+    )}
+
+    <div class="flex flex-1 flex-col gap-3 p-5 sm:p-6">
+      <p class="text-lg text-[#FBE9A5]/70">
+        📅 {fecha.fecha}
+        {fecha.hora && <span class="text-[#FBE9A5]/50"> · {fecha.hora}</span>}
+      </p>
+
+      <h3 class="text-3xl leading-tight text-[#FBE9A5] sm:text-4xl">{event.title}</h3>
+
+      {event.artist && <p class="text-xl text-[#FBE9A5]/85">🎤 {event.artist}</p>}
+
+      {event.ticket_info && (
+        <p class="rounded-lg border border-[#31572A] bg-[#31572A]/30 px-3 py-2 text-lg text-[#FBE9A5]/85">
+          🎟️ {event.ticket_info}
+        </p>
+      )}
+
+      <a
+        href="/eventos"
+        class="mt-auto inline-block text-lg text-[#FBE9A5]/70 underline-offset-4 transition-colors hover:text-[#FBE9A5] hover:underline"
+      >
+        Ver todos los eventos →
+      </a>
+    </div>
+  </article>
+) : (
+  <div class="rounded-2xl border border-dashed border-[#B45427]/60 bg-[#770a15]/60 px-6 py-10 text-center">
+    <p class="text-2xl text-[#FBE9A5]">No hay eventos programados por ahora.</p>
+    <p class="mt-2 text-lg text-[#FBE9A5]/70">Volvé pronto para conocer las próximas fechas.</p>
+    <a
+      href="/eventos"
+      class="mt-5 inline-block rounded-lg bg-[#31572A] px-5 py-2.5 text-lg text-[#FBE9A5] transition-colors duration-300 hover:bg-[#3f6b3f]"
+    >
+      Ver la agenda
+    </a>
+  </div>
+)}

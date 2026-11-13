@@ -1,0 +1,221 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  imagenes: ImageMetadata[];
+  alt?: string;
+}
+
+const { imagenes, alt = 'Página de la carta' } = Astro.props;
+const total = imagenes.length;
+---
+
+<section class="flex w-full flex-1 flex-col items-center px-3 py-4 sm:px-6" data-carta>
+  <div
+    class="relative mx-auto w-full max-w-xl md:overflow-hidden md:rounded-2xl md:border md:border-[#B45427]/50 md:bg-black/40 md:shadow-2xl"
+  >
+    <div
+      class="flex flex-col gap-4 md:flex-row md:gap-0 md:snap-x md:snap-mandatory md:overflow-x-auto md:scroll-smooth"
+      data-track
+    >
+      {imagenes.map((imagen, i) => (
+        <button
+          type="button"
+          data-slide
+          data-full={imagen.src}
+          aria-label={`Ampliar página ${i + 1} de ${total}`}
+          class="group flex w-full shrink-0 cursor-zoom-in items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FBE9A5] md:h-full md:snap-center md:p-2"
+        >
+          <Image
+            src={imagen}
+            alt={`${alt} ${i + 1}`}
+            widths={[320, 480, 640]}
+            sizes="(min-width: 768px) 34rem, 92vw"
+            format="webp"
+            quality={90}
+            loading={i === 0 ? 'eager' : 'lazy'}
+            draggable="false"
+            class="h-auto w-full rounded-2xl border border-[#B45427]/40 object-contain shadow-lg transition-opacity duration-300 group-hover:opacity-90 md:max-h-[calc(100dvh-11rem)] md:rounded-lg md:border-0 md:shadow-none"
+          />
+        </button>
+      ))}
+    </div>
+
+    <button
+      type="button"
+      data-prev
+      aria-label="Página anterior"
+      class="absolute left-2 top-1/2 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white backdrop-blur transition hover:bg-black/80 focus-visible:outline-2 focus-visible:outline-[#FBE9A5] disabled:pointer-events-none disabled:opacity-0 md:grid"
+    >
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="m15 18-6-6 6-6" />
+      </svg>
+    </button>
+
+    <button
+      type="button"
+      data-next
+      aria-label="Página siguiente"
+      class="absolute right-2 top-1/2 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/60 text-white backdrop-blur transition hover:bg-black/80 focus-visible:outline-2 focus-visible:outline-[#FBE9A5] disabled:pointer-events-none disabled:opacity-0 md:grid"
+    >
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="m9 18 6-6-6-6" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Controles del carrusel: solo en escritorio, en mobile las páginas se apilan. -->
+  <div class="mt-4 hidden w-full max-w-xl flex-col items-center gap-2 md:flex">
+    <div class="flex items-center gap-2" data-dots>
+      {imagenes.map((_, i) => (
+        <button
+          type="button"
+          data-dot={i}
+          aria-label={`Ir a la página ${i + 1}`}
+          class="h-2.5 w-2.5 rounded-full bg-[#FBE9A5]/30 transition-all duration-300 hover:bg-[#FBE9A5]/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FBE9A5]"
+        ></button>
+      ))}
+    </div>
+    <p data-indicador class="text-lg text-[#FBE9A5]/80" aria-live="polite"></p>
+  </div>
+
+  <p class="mt-3 text-center text-base text-[#FBE9A5]/70 md:hidden">
+    Tocá una página para verla más grande.
+  </p>
+
+  <dialog
+    data-lightbox
+    class="m-auto max-h-none max-w-none overflow-visible border-0 bg-transparent p-0"
+  >
+    <div class="relative">
+      <img data-lightbox-img alt="" class="max-h-[90dvh] w-auto max-w-[94vw] rounded-xl object-contain" />
+      <button
+        type="button"
+        data-lightbox-close
+        aria-label="Cerrar"
+        class="absolute right-2 top-2 grid h-10 w-10 place-items-center rounded-full bg-black/70 text-2xl leading-none text-white transition hover:bg-black focus-visible:outline-2 focus-visible:outline-[#FBE9A5]"
+      >
+        ×
+      </button>
+    </div>
+  </dialog>
+</section>
+
+<style>
+  /* El carrusel de escritorio se mueve con scroll-snap nativo: sin barra visible. */
+  @media (min-width: 768px) {
+    [data-track] {
+      scrollbar-width: none;
+      overscroll-behavior-x: contain;
+    }
+
+    [data-track]::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  [data-lightbox]::backdrop {
+    background: rgba(0, 0, 0, 0.92);
+  }
+</style>
+
+<script>
+  function iniciarCarta(root: HTMLElement) {
+    const track = root.querySelector<HTMLElement>('[data-track]')!;
+    const slides = Array.from(root.querySelectorAll<HTMLElement>('[data-slide]'));
+    const prev = root.querySelector<HTMLButtonElement>('[data-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-next]');
+    const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-dot]'));
+    const indicador = root.querySelector<HTMLElement>('[data-indicador]');
+    const lightbox = root.querySelector<HTMLDialogElement>('[data-lightbox]');
+    const lightboxImg = root.querySelector<HTMLImageElement>('[data-lightbox-img]');
+    const lightboxClose = root.querySelector<HTMLButtonElement>('[data-lightbox-close]');
+    const desktop = window.matchMedia('(min-width: 768px)');
+    const total = slides.length;
+    let actual = 0;
+
+    // En mobile no hay carrusel: las páginas se apilan y se leen con scroll normal.
+    function render() {
+      if (prev) prev.disabled = actual === 0;
+      if (next) next.disabled = actual === total - 1;
+      if (indicador) indicador.textContent = `Página ${actual + 1} de ${total}`;
+
+      dots.forEach((dot, i) => {
+        const activo = i === actual;
+        dot.classList.toggle('bg-[#FBE9A5]', activo);
+        dot.classList.toggle('w-6', activo);
+        dot.classList.toggle('bg-[#FBE9A5]/30', !activo);
+        dot.setAttribute('aria-current', String(activo));
+      });
+    }
+
+    function ir(indice: number, behavior: ScrollBehavior = 'smooth') {
+      const destino = Math.min(Math.max(indice, 0), total - 1);
+      actual = destino;
+      if (desktop.matches) {
+        track.scrollTo({ left: destino * track.clientWidth, behavior });
+      }
+      render();
+    }
+
+    prev?.addEventListener('click', () => ir(actual - 1));
+    next?.addEventListener('click', () => ir(actual + 1));
+    dots.forEach((dot, i) => dot.addEventListener('click', () => ir(i)));
+
+    // Al scrollear con el trackpad / dedo en escritorio, actualizamos el indicador.
+    let scrollTimer: ReturnType<typeof setTimeout> | undefined;
+    track.addEventListener('scroll', () => {
+      if (!desktop.matches) return;
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        if (!track.clientWidth) return;
+        actual = Math.min(Math.max(Math.round(track.scrollLeft / track.clientWidth), 0), total - 1);
+        render();
+      }, 80);
+    });
+
+    track.addEventListener('keydown', (event) => {
+      if (!desktop.matches) return;
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        ir(actual + 1);
+      }
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        ir(actual - 1);
+      }
+    });
+
+    // Al cambiar de tamaño, reacomodamos el carrusel (o lo soltamos en mobile).
+    desktop.addEventListener('change', () => {
+      if (desktop.matches) {
+        // Asignación directa: sin animación, para no "volar" de página al redimensionar.
+        track.scrollLeft = actual * track.clientWidth;
+      } else {
+        track.scrollLeft = 0;
+      }
+      render();
+    });
+
+    // ---------- Ver página ampliada ----------
+
+    slides.forEach((slide) => {
+      slide.addEventListener('click', () => {
+        const src = slide.dataset.full;
+        if (!src || !lightbox || !lightboxImg) return;
+        lightboxImg.src = src;
+        lightboxImg.alt = slide.querySelector('img')?.alt ?? '';
+        lightbox.showModal();
+      });
+    });
+
+    lightboxClose?.addEventListener('click', () => lightbox?.close());
+    lightbox?.addEventListener('click', (event) => {
+      if (event.target === lightbox) lightbox.close();
+    });
+
+    render();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-carta]').forEach(iniciarCarta);
+</script>

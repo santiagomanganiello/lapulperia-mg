@@ -1,0 +1,173 @@
+---
+import { Image } from 'astro:assets';
+import Layout from '../layouts/Layout.astro';
+import NextEvent from '../components/NextEvent.astro';
+import foto1 from '../assets/pulpe/pulpe-1.webp';
+import foto2 from '../assets/pulpe/pulpe-2.webp';
+import foto3 from '../assets/pulpe/pulpe-6.webp';
+
+const teaser = [foto1, foto2, foto3];
+
+const accesos = [
+  {
+    href: '/eventos',
+    titulo: 'Eventos',
+    texto: 'Recitales, fechas y noches especiales.',
+    icono: '🎶',
+  },
+  {
+    href: '/carta',
+    titulo: 'Carta',
+    texto: 'Comidas, tragos y algo para picar.',
+    icono: '🍺',
+  },
+  {
+    href: '/fotos',
+    titulo: 'Fotos',
+    texto: 'Un poco del lugar y su gente.',
+    icono: '📸',
+  },
+  {
+    href: 'https://www.google.com/maps?cid=15119335724706526737&g_mp=CiVnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLkdldFBsYWNlEAMYASAF',
+    titulo: 'Ubicación',
+    texto: 'Av. Dardo Rocha 396.',
+    icono: '📍',
+  },
+];
+---
+
+<Layout title="La Pulpería - MG">
+  <div class="flex w-full flex-1 flex-col items-center">
+    <!-- Hero -->
+    <section class="w-full">
+      <div class="mx-auto flex max-w-5xl flex-col items-start gap-6 px-4 py-12 sm:px-8 sm:py-20">
+        <span class="rounded-full border border-[#B45427]/60 bg-black/20 px-4 py-1.5 text-lg tracking-wide text-[#FBE9A5]/80">
+          Bar · Música en vivo · Eventos
+        </span>
+
+        <h1 class="text-5xl leading-[0.95] text-[#FBE9A5] sm:text-7xl">La Pulpería - Monte Grande</h1>
+
+        <p class="max-w-2xl text-xl leading-relaxed text-[#FBE9A5]/80 sm:text-2xl">
+          Un bar de barrio para encontrarse, escuchar buena música y estirar la noche.
+        </p>
+
+        <div class="flex flex-wrap gap-3">
+          <a
+            href="/eventos"
+            class="rounded-lg bg-[#31572A] px-6 py-3 text-xl text-[#FBE9A5] transition-colors duration-300 hover:bg-[#3f6b3f]"
+          >
+            Ver próximos eventos
+          </a>
+          <a
+            href="/carta"
+            class="rounded-lg border border-[#B45427]/60 px-6 py-3 text-xl text-[#FBE9A5] transition-colors duration-300 hover:bg-[#770a15]"
+          >
+          Ver la carta
+          </a>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <a 
+            href="https://www.instagram.com/lapulperiamg/"
+            class="rounded-lg bg-pink-600 px-6 py-3 text-xl text-[#FBE9A5] transition-colors duration-300 hover:bg-pink-500"
+            target="_blank"
+          >
+          Instagram
+          </a>
+          <a 
+            href="https://wa.link/ek6blk"
+            class="rounded-lg bg-[#31572A] px-6 py-3 text-xl text-[#FBE9A5] transition-colors duration-300 hover:bg-[#3f6b3f]"
+          >
+          Delivery
+          </a>
+        </div>  
+      </div>
+    </section>
+
+    <!-- Próximo evento (server island: la home queda estática y esto se mantiene fresco) -->
+    <section class="mx-auto w-full max-w-5xl px-4 pb-12 sm:px-8">
+      <div class="mb-4 flex items-end justify-between gap-4">
+        <h2 class="text-3xl text-[#FBE9A5] sm:text-4xl">Próximo evento</h2>
+        <a
+          href="/eventos"
+          class="shrink-0 text-lg text-[#FBE9A5]/70 transition-colors hover:text-[#FBE9A5]"
+        >
+          Ver todos →
+        </a>
+      </div>
+
+      <NextEvent server:defer>
+        <div slot="fallback" class="animate-pulse rounded-2xl border border-[#B45427]/40 bg-[#770a15] p-6">
+          <div class="h-5 w-48 rounded bg-[#FBE9A5]/10"></div>
+          <div class="mt-4 h-9 w-2/3 rounded bg-[#FBE9A5]/10"></div>
+          <div class="mt-3 h-5 w-1/2 rounded bg-[#FBE9A5]/10"></div>
+        </div>
+      </NextEvent>
+    </section>
+
+    <!-- Accesos -->
+    <section class="mx-auto w-full max-w-5xl px-4 pb-12 sm:px-8">
+      <h2 class="mb-4 text-3xl text-[#FBE9A5] sm:text-4xl">Explorá</h2>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {accesos.map((acceso) => (
+          <a
+            href={acceso.href}
+            class="group flex items-center gap-4 rounded-2xl border border-[#B45427]/50 bg-[#770a15] p-5 transition-colors duration-300 hover:border-[#FBE9A5]/30 hover:bg-[#31572A]/40"
+          >
+            <span
+              class="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-[#FBE9A5]/70 text-2xl"
+              aria-hidden="true"
+            >
+              {acceso.icono}
+            </span>
+            <span class="min-w-0">
+              <span class="block text-2xl text-[#FBE9A5]">{acceso.titulo}</span>
+              <span class="block text-lg text-[#FBE9A5]/70">{acceso.texto}</span>
+            </span>
+            <span
+              class="ml-auto text-2xl text-[#FBE9A5]/40 transition-transform duration-300 group-hover:translate-x-1"
+              aria-hidden="true"
+            >
+              →
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Galería teaser -->
+    <section class="mx-auto w-full max-w-5xl px-4 pb-16 sm:px-8">
+      <div class="mb-4 flex items-end justify-between gap-4">
+        <h2 class="text-3xl text-[#FBE9A5] sm:text-4xl">Fotos de la pulpe</h2>
+        <a
+          href="/fotos"
+          class="shrink-0 text-lg text-[#FBE9A5]/70 transition-colors hover:text-[#FBE9A5]"
+        >
+          Ver fotos →
+        </a>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 sm:gap-3">
+        {teaser.map((foto, i) => (
+          <a
+            href="/fotos"
+            class="group overflow-hidden rounded-xl border border-[#B45427]/40"
+            aria-label={`Ver todas las fotos (${i + 1})`}
+          >
+            <Image
+              src={foto}
+              alt=""
+              width={640}
+              widths={[320, 480, 640]}
+              sizes="(min-width: 768px) 20vw, 30vw"
+              format="webp"
+              quality={80}
+              loading="lazy"
+              class="aspect-4/5 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </a>
+        ))}
+      </div>
+    </section>
+  </div>
+</Layout>

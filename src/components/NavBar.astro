@@ -1,0 +1,123 @@
+---
+import { Image } from 'astro:assets';
+import Logo from '../assets/pulpe-logo.jpg';
+
+const links = [
+    { href: '/', label: 'Inicio' },
+    { href: '/carta', label: 'Carta' },
+    { href: '/eventos', label: 'Eventos' },
+    { href: '/fotos', label: 'Fotos' },
+    { href: '/location', label: 'Ubicación' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<nav class="relative z-50 w-full shrink-0 bg-[#770a15] md:sticky md:top-0 md:flex md:h-screen md:w-fit md:flex-col md:items-center md:self-start md:overflow-y-auto md:p-4">
+    <div class="flex items-center justify-between gap-3 p-4 md:flex-col md:justify-start md:gap-0 md:p-0">
+        <a href="/" class="shrink-0" aria-label="Ir al inicio">
+            <Image
+                src={Logo}
+                alt="Logo La Pulpería MG"
+                class="h-17 w-auto rounded-full border-2 border-[#B45427] object-cover md:mb-10 md:h-27 md:w-auto"
+                width={128}
+                height={128}
+            />
+        </a>
+
+        <button
+            type="button"
+            class="flex h-11 w-11 flex-col items-center justify-center gap-1.5 rounded-lg text-[#FBE9A5] transition-colors duration-300 hover:bg-[#31572A] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FBE9A5] md:hidden"
+            aria-label="Abrir menú"
+            aria-expanded="false"
+            aria-controls="menu-principal"
+            data-menu-toggle
+        >
+            <span class="bar block h-0.5 w-6 rounded-full bg-current transition-transform duration-300"></span>
+            <span class="bar block h-0.5 w-6 rounded-full bg-current transition-opacity duration-300"></span>
+            <span class="bar block h-0.5 w-6 rounded-full bg-current transition-transform duration-300"></span>
+        </button>
+    </div>
+
+    <ul
+        id="menu-principal"
+        class="hidden w-full flex-col items-stretch gap-1 border-t border-[#B45427]/40 p-3 text-center font-bold md:flex md:w-auto md:items-center md:gap-0 md:space-y-5 md:border-0 md:p-0"
+        data-menu
+    >
+        {links.map((link) => {
+            const isActive = link.href !== '#' && currentPath === link.href;
+            return (
+                <li>
+                    <a
+                        href={link.href}
+                        aria-current={isActive ? 'page' : undefined}
+                        class:list={[
+                            'block rounded-lg px-4 py-2.5 text-xl text-[#FBE9A5] transition-all duration-300 hover:bg-[#31572A] md:text-2xl md:px-4 md:py-3',
+                            isActive && 'bg-[#31572A]',
+                        ]}
+                    >
+                        {link.label}
+                    </a>
+                </li>
+            );
+        })}
+    </ul>
+</nav>
+
+<script>
+    const toggle = document.querySelector('[data-menu-toggle]');
+    const menu = document.querySelector('[data-menu]');
+
+    if (toggle && menu) {
+        const setOpen = (open) => {
+            toggle.setAttribute('aria-expanded', String(open));
+            toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+            menu.classList.toggle('hidden', !open);
+            menu.classList.toggle('flex', open);
+        };
+
+        toggle.addEventListener('click', () => {
+            setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+        });
+
+        menu.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', () => setOpen(false));
+        });
+
+        const desktop = window.matchMedia('(min-width: 768px)');
+        desktop.addEventListener('change', (event) => {
+            if (event.matches) setOpen(false);
+        });
+    }
+</script>
+
+<style>
+    [data-menu-toggle][aria-expanded='true'] .bar:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+    }
+
+    [data-menu-toggle][aria-expanded='true'] .bar:nth-child(2) {
+        opacity: 0;
+    }
+
+    [data-menu-toggle][aria-expanded='true'] .bar:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+    }
+
+    @media (max-width: 767px) {
+        [data-menu]:not(.hidden) {
+            animation: menu-in 0.2s ease-out;
+        }
+    }
+
+    @keyframes menu-in {
+        from {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

@@ -40,15 +40,18 @@ Las fechas se guardan en UTC y se muestran siempre en `America/Argentina/Buenos_
 
 ## Calidad de código
 
-El repo se mantiene con tres chequeos que no dependen de mirar la pantalla:
+El repo se mantiene con cuatro chequeos que no dependen de mirar la pantalla:
 
 | Comando                | Qué cubre                                                           |
 | ---------------------- | ------------------------------------------------------------------- |
 | `npm run check`        | Tipos de TypeScript y componentes Astro (`astro check`).            |
 | `npm run lint`         | ESLint con reglas de TypeScript, Astro y accesibilidad recomendada. |
+| `npm test`             | Lógica de horarios, fechas y `.ics` (Vitest).                       |
 | `npm run format:check` | Que todo el repo respete Prettier (sin reescribir archivos).        |
 
 Prettier y ESLint no se pisan: `eslint-config-prettier` apaga las reglas de estilo de ESLint y el formato queda en un solo lugar. `.editorconfig` fija LF, UTF-8 y 2 espacios para que el editor no introduzca diferencias.
+
+Los tests se concentran donde el código es más frágil: los turnos que cruzan medianoche y las fechas que se guardan en UTC pero se muestran en Argentina. El generador de `.ics` vive en `src/lib/calendar.ts` (no en la ruta) justamente para poder probarlo sin Supabase ni un servidor. No se testea el HTML ni los textos: cambian seguido y no dan señal.
 
 ## Limitaciones conocidas
 

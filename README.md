@@ -55,9 +55,23 @@ Ejecutar [`supabase-setup.sql`](supabase-setup.sql) en el SQL Editor de Supabase
 | `npm run check`        | Verificación de tipos (`astro check`).      |
 | `npm run lint`         | ESLint (TypeScript + Astro).                |
 | `npm run lint:fix`     | ESLint con corrección automática.           |
+| `npm test`             | Tests unitarios (Vitest).                   |
+| `npm run test:watch`   | Tests en modo interactivo.                  |
 | `npm run format`       | Prettier sobre todo el repo.                |
 | `npm run format:check` | Verifica el formato sin escribir.           |
 | `npm run astro ...`    | CLI de Astro.                               |
+
+### Tests
+
+Los tests cubren la lógica que no se ve en pantalla y que es fácil de romper:
+
+| Archivo                  | Qué prueba                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| `tests/hours.test.ts`    | Turnos que cruzan medianoche, estado abierto/cerrado y textos del badge.       |
+| `tests/events.test.ts`   | Formato de fechas en `America/Argentina_Buenos_Aires` y etiquetas relativas.   |
+| `tests/calendar.test.ts` | Generación del `.ics`: fechas UTC, duración, escapado y composición del texto. |
+
+No se testean los textos ni el HTML: cambian seguido y no aportan señal.
 
 ## Estructura
 

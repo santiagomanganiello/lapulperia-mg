@@ -45,3 +45,6 @@ export const DIRECTIONS_URL = `https://www.google.com/maps/dir/?api=1&destinatio
 )}`;
 
 export const ADDRESS_LINE = `${SITE.address.street}, ${SITE.address.locality}`;
+
+/** Dirección para el campo LOCATION del calendario y otros usos sin país. */
+export const LOCATION_LINE = `${SITE.address.street}, ${SITE.address.locality}, ${SITE.address.region}`;

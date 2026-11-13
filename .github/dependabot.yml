@@ -11,6 +11,11 @@ updates:
       time: '06:00'
       timezone: America/Argentina/Buenos_Aires
     open-pull-requests-limit: 5
+    ignore:
+      # @astrojs/check 0.9.x solo acepta TypeScript 5 y 6. Quitar esta regla
+      # cuando el checker soporte la 7.
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
     groups:
       astro:
         patterns:

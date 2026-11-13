@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import Location from "../components/Location.astro";
 import Hours from "../components/Hours.astro";
-import { SITE, ADDRESS_LINE, MAPS_URL, WHATSAPP_URL } from "../lib/site";
+import { SITE, ADDRESS_LINE, MAPS_URL, DIRECTIONS_URL, WHATSAPP_URL } from "../lib/site";
 ---
 
 <Layout
@@ -13,14 +13,24 @@ import { SITE, ADDRESS_LINE, MAPS_URL, WHATSAPP_URL } from "../lib/site";
     <h1 class="text-4xl text-[#FBE9A5] sm:text-5xl">Dónde estamos</h1>
     <p class="mt-2 text-2xl text-[#FBE9A5]/80">{ADDRESS_LINE}</p>
 
-    <a
-      href={MAPS_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      class="mt-3 inline-block text-lg text-[#FBE9A5]/70 underline-offset-4 transition-colors hover:text-[#FBE9A5] hover:underline"
-    >
-      Abrir en Google Maps →
-    </a>
+    <div class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+      <a
+        href={DIRECTIONS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 rounded-lg bg-[#31572A] px-4 py-2 text-lg text-[#FBE9A5] transition-colors duration-300 hover:bg-[#3f6b3f]"
+      >
+        Cómo llegar →
+      </a>
+      <a
+        href={MAPS_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-lg text-[#FBE9A5]/70 underline-offset-4 transition-colors hover:text-[#FBE9A5] hover:underline"
+      >
+        Ver en Google Maps
+      </a>
+    </div>
 
     <div class="mt-8 grid gap-6 lg:grid-cols-[2fr_1fr]">
       <Location />

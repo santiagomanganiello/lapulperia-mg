@@ -1,6 +1,6 @@
 ---
 import Hours from './Hours.astro';
-import { SITE, WHATSAPP_URL, MAPS_URL, ADDRESS_LINE } from '../lib/site';
+import { SITE, WHATSAPP_URL, DIRECTIONS_URL, ADDRESS_LINE } from '../lib/site';
 
 const links = [
   { href: '/eventos', label: 'Eventos' },
@@ -46,7 +46,7 @@ const year = new Date().getFullYear();
         {ADDRESS_LINE}
       </address>
       <a
-        href={MAPS_URL}
+        href={DIRECTIONS_URL}
         target="_blank"
         rel="noopener noreferrer"
         class="w-fit text-lg text-[#FBE9A5]/70 underline-offset-4 transition-colors hover:text-[#FBE9A5] hover:underline"

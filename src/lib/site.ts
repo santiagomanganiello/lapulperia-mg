@@ -23,8 +23,7 @@ export const SITE = {
     message: 'Hola! Quería hacer un pedido de delivery.',
   },
   social: {
-    // Completar cuando esté el handle, ej: 'https://instagram.com/lapulperiamg'
-    instagram: null as string | null,
+    instagram: 'https://www.instagram.com/lapulperiamg/',
   },
 } as const;
 

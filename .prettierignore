@@ -1,0 +1,22 @@
+# Build y dependencias
+node_modules/
+dist/
+.vercel/
+.astro/
+coverage/
+playwright-report/
+test-results/
+package-lock.json
+
+# Imágenes originales sin comprimir (fuera del repo igualmente)
+originals/
+public/fotos/
+public/fonts/
+
+# Contenido generado o de terceros
+*.min.*
+*.map
+
+# Instrucciones locales
+AGENTS.md
+.opencode/

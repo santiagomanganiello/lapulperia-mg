@@ -1,0 +1,41 @@
+version: 2
+
+updates:
+  # Dependencias de npm (Astro, Tailwind, Supabase, etc.).
+  # Agrupa los parches y menores en un solo PR semanal para no llenar el repo de PRs.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: America/Argentina/Buenos_Aires
+    open-pull-requests-limit: 5
+    groups:
+      astro:
+        patterns:
+          - astro
+          - '@astrojs/*'
+      tailwind:
+        patterns:
+          - tailwindcss
+          - '@tailwindcss/*'
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+
+  # Acciones de GitHub usadas en los workflows de CI.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: America/Argentina/Buenos_Aires
+    commit-message:
+      prefix: ci

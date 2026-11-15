@@ -24,4 +24,8 @@ export default defineConfig({
       expiration: 60,
     },
   }),
+  // Playwright la apaga para que la barra de desarrollo no interfiera con los E2E.
+  devToolbar: {
+    enabled: process.env.DISABLE_DEV_TOOLBAR !== 'true',
+  },
 });

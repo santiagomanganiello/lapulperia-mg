@@ -36,7 +36,8 @@ test('la galería de fotos se usa con teclado', async ({ page }) => {
 test('la carta ampliada se cierra con Escape', async ({ page }) => {
   await page.goto('/carta');
 
-  const primera = page.getByRole('button', { name: 'Ampliar página 1 de 6' });
+  const total = await page.locator('[data-slide]').count();
+  const primera = page.getByRole('button', { name: `Ampliar página 1 de ${total}` });
   const dialog = page.getByRole('dialog', { name: 'Vista ampliada de la carta' });
 
   await primera.focus();

@@ -34,7 +34,7 @@ const grandes = await Promise.all(
       >
         <Image
           src={imagen}
-          alt={`${alt} ${i + 1}`}
+          alt={`${alt}, foto ${i + 1} de ${total}`}
           width={800}
           widths={[480, 800]}
           sizes="(min-width: 768px) 30vw, 45vw"
@@ -49,6 +49,7 @@ const grandes = await Promise.all(
 
   <dialog
     data-lightbox
+    aria-label="Galería de fotos"
     class="m-auto max-h-none w-auto max-w-none overflow-visible border-0 bg-transparent p-0"
   >
     <div class="relative">
@@ -138,6 +139,8 @@ const grandes = await Promise.all(
         actual = i;
         render();
         lightbox?.showModal();
+        // El foco entra al diálogo por el botón de cerrar: teclado y lectores lo encuentran.
+        cerrar?.focus();
       });
     });
 

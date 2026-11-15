@@ -68,18 +68,22 @@ Astro.response.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate
           </span>
         )}
         <p class="text-lg text-[#FBE9A5]/70">
-          📅 {fecha.fecha}
-          {fecha.hora && <span class="text-[#FBE9A5]/50"> · {fecha.hora}</span>}
+          <span aria-hidden="true">📅</span> {fecha.fecha}
+          {fecha.hora && <span class="text-[#FBE9A5]/70"> · {fecha.hora}</span>}
         </p>
       </div>
 
       <h3 class="text-3xl leading-tight text-[#FBE9A5] sm:text-4xl">{event.title}</h3>
 
-      {event.artist && <p class="text-xl text-[#FBE9A5]/85">🎤 {event.artist}</p>}
+      {event.artist && (
+        <p class="text-xl text-[#FBE9A5]/85">
+          <span aria-hidden="true">🎤</span> {event.artist}
+        </p>
+      )}
 
       {event.ticket_info && (
         <p class="rounded-lg border border-[#31572A] bg-[#31572A]/30 px-3 py-2 text-lg text-[#FBE9A5]/85">
-          🎟️ {event.ticket_info}
+          <span aria-hidden="true">🎟️</span> {event.ticket_info}
         </p>
       )}
 
@@ -92,7 +96,7 @@ Astro.response.headers.set('Cache-Control', 's-maxage=60, stale-while-revalidate
         </a>
         <a
           href={`/eventos/${event.id}.ics`}
-          class="inline-flex items-center gap-2 text-lg text-[#FBE9A5]/60 underline-offset-4 transition-colors hover:text-[#FBE9A5] hover:underline"
+          class="inline-flex items-center gap-2 text-lg text-[#FBE9A5]/70 underline-offset-4 transition-colors hover:text-[#FBE9A5] hover:underline"
         >
           <span aria-hidden="true">📆</span>
           Agregar al calendario

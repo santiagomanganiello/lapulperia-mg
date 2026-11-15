@@ -70,7 +70,7 @@ const total = imagenes.length;
           type="button"
           data-dot={i}
           aria-label={`Ir a la página ${i + 1}`}
-          class="h-2.5 w-2.5 rounded-full bg-[#FBE9A5]/30 transition-all duration-300 hover:bg-[#FBE9A5]/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FBE9A5]"
+          class="h-2.5 w-2.5 rounded-full bg-[#FBE9A5]/50 transition-all duration-300 hover:bg-[#FBE9A5]/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FBE9A5]"
         ></button>
       ))}
     </div>
@@ -83,6 +83,7 @@ const total = imagenes.length;
 
   <dialog
     data-lightbox
+    aria-label="Vista ampliada de la carta"
     class="m-auto max-h-none max-w-none overflow-visible border-0 bg-transparent p-0"
   >
     <div class="relative">
@@ -133,6 +134,7 @@ const total = imagenes.length;
     const lightboxImg = root.querySelector<HTMLImageElement>('[data-lightbox-img]');
     const lightboxClose = root.querySelector<HTMLButtonElement>('[data-lightbox-close]');
     const desktop = window.matchMedia('(min-width: 768px)');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const total = slides.length;
     let actual = 0;
 
@@ -146,12 +148,15 @@ const total = imagenes.length;
         const activo = i === actual;
         dot.classList.toggle('bg-[#FBE9A5]', activo);
         dot.classList.toggle('w-6', activo);
-        dot.classList.toggle('bg-[#FBE9A5]/30', !activo);
+        dot.classList.toggle('bg-[#FBE9A5]/50', !activo);
         dot.setAttribute('aria-current', String(activo));
       });
     }
 
-    function ir(indice: number, behavior: ScrollBehavior = 'smooth') {
+    function ir(
+      indice: number,
+      behavior: ScrollBehavior = reduceMotion.matches ? 'auto' : 'smooth'
+    ) {
       const destino = Math.min(Math.max(indice, 0), total - 1);
       actual = destino;
       if (desktop.matches) {
@@ -208,6 +213,8 @@ const total = imagenes.length;
         lightboxImg.src = src;
         lightboxImg.alt = slide.querySelector('img')?.alt ?? '';
         lightbox.showModal();
+        // El foco entra al diálogo por el botón de cerrar: teclado y lectores lo encuentran.
+        lightboxClose?.focus();
       });
     });
 

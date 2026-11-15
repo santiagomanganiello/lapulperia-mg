@@ -2,7 +2,7 @@
 import AdminLayout from '../../layouts/AdminLayout.astro';
 
 const inputClass =
-  'w-full rounded-lg border border-[#B45427]/50 bg-[#8A131F] px-3 py-2 text-lg text-[#FBE9A5] placeholder:text-[#FBE9A5]/40 focus:border-[#FBE9A5] focus:outline-none';
+  'w-full rounded-lg border border-[#B45427]/50 bg-[#8A131F] px-3 py-2 text-lg text-[#FBE9A5] placeholder:text-[#FBE9A5]/70 focus:border-[#FBE9A5] focus:outline-none';
 ---
 
 <AdminLayout title="Eventos · La Pulpería MG" showLogout>
@@ -26,6 +26,7 @@ const inputClass =
     <h1 class="text-3xl sm:text-4xl">Falta configurar Supabase</h1>
     <p
       data-config-error
+      role="alert"
       class="max-w-xl rounded-lg border border-red-400/60 bg-red-950/40 px-4 py-3 text-left text-lg text-red-200"
     ></p>
     <a
@@ -63,6 +64,7 @@ const inputClass =
 
     <p
       data-status
+      role="status"
       class="mb-4 hidden rounded-lg border border-[#31572A] bg-[#31572A]/30 px-4 py-3 text-lg"
     ></p>
 
@@ -79,11 +81,12 @@ const inputClass =
   <!-- Modal para crear / editar un evento -->
   <dialog
     data-dialog
+    aria-labelledby="form-title"
     class="m-auto w-[calc(100%-2rem)] max-w-lg self-center rounded-2xl border border-[#B45427] bg-[#770a15] p-3 text-[#FBE9A5]"
   >
     <div class="rounded-xl">
       <div class="flex items-center justify-between border-b border-[#B45427]/40 px-4 py-3">
-        <h2 data-form-title class="text-2xl">
+        <h2 id="form-title" data-form-title class="text-2xl">
           Nuevo evento
         </h2>
         <button
@@ -187,7 +190,7 @@ const inputClass =
             accept="image/*"
             class="mt-2 w-full text-lg text-[#FBE9A5]/80 file:mr-3 file:rounded-lg file:border-0 file:bg-[#31572A] file:px-3 file:py-2 file:text-[#FBE9A5] file:hover:bg-[#3f6b3f]"
           />
-          <p class="mt-1 text-base text-[#FBE9A5]/60">
+          <p class="mt-1 text-base text-[#FBE9A5]/70">
             Podés subir una imagen o pegar una URL. Si subís una imagen, se usa esa. La foto se
             optimiza sola antes de subir (máximo 1600 px de ancho, formato WebP).
           </p>
@@ -210,12 +213,13 @@ const inputClass =
         <label class="flex items-center gap-3 text-lg">
           <input data-field="published" type="checkbox" class="h-5 w-5 rounded accent-[#31572A]" />
           <span>
-            Publicado <span class="text-[#FBE9A5]/60">(visible en la web pública)</span>
+            Publicado <span class="text-[#FBE9A5]/70">(visible en la web pública)</span>
           </span>
         </label>
 
         <p
           data-form-error
+          role="alert"
           class="hidden rounded-lg border border-red-400/60 bg-red-950/40 px-3 py-2 text-lg text-red-200"
         ></p>
 
@@ -266,8 +270,8 @@ const inputClass =
         </div>
         <p data-t-artist class="text-lg text-[#FBE9A5]/85"></p>
         <p data-t-date class="text-lg text-[#FBE9A5]/70"></p>
-        <p data-t-description class="empty:hidden truncate text-lg text-[#FBE9A5]/60"></p>
-        <p data-t-tickets class="empty:hidden truncate text-lg text-[#FBE9A5]/60"></p>
+        <p data-t-description class="empty:hidden truncate text-lg text-[#FBE9A5]/70"></p>
+        <p data-t-tickets class="empty:hidden truncate text-lg text-[#FBE9A5]/70"></p>
       </div>
       <div class="flex shrink-0 flex-wrap items-center gap-2 sm:flex-col sm:items-stretch">
         <button
@@ -303,9 +307,12 @@ const inputClass =
   <!-- Confirmación para borrar (reemplaza al confirm() del navegador) -->
   <dialog
     data-confirm
+    aria-labelledby="confirm-title"
     class="w-[calc(100%-2rem)] max-w-md self-center rounded-2xl border border-red-400/60 bg-[#770a15] p-6 text-[#FBE9A5]"
   >
-    <h2 class="text-2xl">Borrar evento</h2>
+    <h2 id="confirm-title" class="text-2xl">
+      Borrar evento
+    </h2>
     <p class="mt-2 text-lg text-[#FBE9A5]/80">
       ¿Seguro que querés borrar «<span data-confirm-title class="font-bold"></span>»? Esta acción no
       se puede deshacer.

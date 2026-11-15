@@ -20,3 +20,27 @@
   --color-tertiary: #31572a;
   --color-quaternary: #b45427;
 }
+
+@layer base {
+  /* Foco visible y consistente para navegación con teclado en todo el sitio. */
+  :focus-visible {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+
+  /*
+   * Quien pidió menos movimiento en su sistema no debería recibir animaciones,
+   * transiciones ni scroll suave. Se reducen a casi cero en vez de borrarlas:
+   * así los eventos `transitionend`/`animationend` siguen disparándose.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

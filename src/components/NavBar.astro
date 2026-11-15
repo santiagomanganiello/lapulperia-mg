@@ -65,8 +65,8 @@ const currentPath = Astro.url.pathname;
 </nav>
 
 <script>
-  const toggle = document.querySelector('[data-menu-toggle]');
-  const menu = document.querySelector('[data-menu]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
 
   if (toggle && menu) {
     const setOpen = (open: boolean) => {
@@ -78,6 +78,13 @@ const currentPath = Astro.url.pathname;
 
     toggle.addEventListener('click', () => {
       setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+
+    // Escape cierra el menú y devuelve el foco al botón que lo abrió.
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || toggle.getAttribute('aria-expanded') !== 'true') return;
+      setOpen(false);
+      toggle.focus();
     });
 
     menu.querySelectorAll('a').forEach((link) => {

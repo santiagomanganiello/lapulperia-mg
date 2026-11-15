@@ -23,7 +23,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         autocomplete="username"
         required
         placeholder="admin@ejemplo.com"
-        class="w-full rounded-lg border border-[#B45427]/50 bg-[#8A131F] px-3 py-2 text-xl text-[#FBE9A5] placeholder:text-[#FBE9A5]/40 focus:border-[#FBE9A5] focus:outline-none"
+        class="w-full rounded-lg border border-[#B45427]/50 bg-[#8A131F] px-3 py-2 text-xl text-[#FBE9A5] placeholder:text-[#FBE9A5]/70 focus:border-[#FBE9A5] focus:outline-none"
       />
 
       <label for="password" class="mb-1 mt-4 block text-xl">
@@ -36,11 +36,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
         autocomplete="current-password"
         required
         placeholder="••••••••"
-        class="w-full rounded-lg border border-[#B45427]/50 bg-[#8A131F] px-3 py-2 text-xl text-[#FBE9A5] placeholder:text-[#FBE9A5]/40 focus:border-[#FBE9A5] focus:outline-none"
+        class="w-full rounded-lg border border-[#B45427]/50 bg-[#8A131F] px-3 py-2 text-xl text-[#FBE9A5] placeholder:text-[#FBE9A5]/70 focus:border-[#FBE9A5] focus:outline-none"
       />
 
       <p
         id="login-error"
+        role="alert"
         class="mb-4 mt-4 hidden rounded-lg border border-red-400/60 bg-red-950/40 px-3 py-2 text-lg text-red-200"
       ></p>
 

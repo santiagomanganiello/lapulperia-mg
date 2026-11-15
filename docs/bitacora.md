@@ -1,6 +1,6 @@
 # La Pulpería MG — Bitácora técnica
 
-**Fase 0 → Fase 3.5 · 13 de noviembre de 2026**
+**Fase 0 → Fase 3.8 · 14 de noviembre de 2026**
 
 Sitio web del bar **La Pulpería MG** (Monte Grande, Buenos Aires): carta, agenda de eventos, fotos, ubicación y un panel para que el dueño publique fechas sin tocar código.
 
@@ -56,6 +56,12 @@ Sitio web del bar **La Pulpería MG** (Monte Grande, Buenos Aires): carta, agend
 - **3.3** Vitest con **55 tests** de horarios, fechas y `.ics`. El generador se extrajo a `src/lib/calendar.ts`. Commit `76e925a`.
 - **3.5** GitHub Actions: `npm ci → check → lint → format:check → test → build`. Commits `b41895d` y `c31036b`.
 - Extra: TypeScript volvió a 6 porque el PR #2 de Dependabot lo había subido a 7, incompatible con `@astrojs/check`.
+
+### Fase 3 — Calidad (bloque 2)
+
+- **3.6** Accesibilidad: `prefers-reduced-motion` global, foco visible unificado, el menú mobile cierra con **Escape**, los visores de fotos y carta llevan el foco al abrirse y lo devuelven al cerrarse, diálogos con nombre accesible, contraste corregido (textos al 50–60 % de opacidad pasaron a 70 %, el "404" y los puntos del carrusel) y `role="alert"` en los errores del panel. Commit `df9dcad`.
+- **3.4** Playwright: **11 smoke E2E** en `tests/e2e/` (rutas públicas, 404, enlaces del menú, galería y carta con teclado, menú mobile). Job `e2e` en el CI que instala Chromium y sube el reporte si falla. La barra de desarrollo de Astro se apaga solo durante los E2E (`DISABLE_DEV_TOOLBAR`). Commit `6910e6f`.
+- **3.8** Capturas en el README: home, home scrolleada, carta, ubicación y mobile.
 
 ---
 
@@ -122,15 +128,17 @@ Sitio web del bar **La Pulpería MG** (Monte Grande, Buenos Aires): carta, agend
 ### 2.9 Tests: unitarios vs end-to-end
 
 - **Unitarios (Vitest):** llaman a una función con casos conocidos. Milisegundos, sin navegador. Cubren 55 casos.
-- **E2E (Playwright, pendiente):** abren un navegador real y hacen clic. Detectan páginas en blanco, enlaces rotos y errores de JavaScript.
-- No se testean textos ni HTML: cambian seguido y no dan señal.
-- Los tests se validaron con una **mutación**: al cambiar a propósito el cierre del jueves, 2 tests fallaron. Si no fallaban, no servían.
+- **E2E (Playwright):** abren Chromium de verdad y hacen clic. Detectan páginas en blanco, enlaces rotos y errores de JavaScript. Cubren 11 casos.
+- Playwright levanta `astro dev` en un puerto fijo y apaga la barra de desarrollo: los E2E no dependen de que el servidor esté abierto, pero **no validan el build de producción** (eso lo hace el job `quality`).
+- No se testean textos ni HTML: cambian seguido y no dan señal. Los E2E sí verifican el `<h1>` de cada página como señal de "la página cargó completa".
+- Los tests unitarios se validaron con una **mutación**: al cambiar a propósito el cierre del jueves, 2 tests fallaron. Si no fallaban, no servían.
 
 ### 2.10 CI/CD: dos robots independientes
 
 ```
-git push ──┬──> GitHub Actions  (calidad: tipos, lint, tests, build)
-           └──> Vercel          (deploy del sitio)
+git push ──┬──> GitHub Actions · job quality  (tipos, lint, tests, build)
+           ├──> GitHub Actions · job e2e      (Chromium, smoke E2E)
+           └──> Vercel                        (deploy del sitio)
 ```
 
 - **Actions** corre en cada push a `main` y en cada pull request.
@@ -151,8 +159,8 @@ git push ──┬──> GitHub Actions  (calidad: tipos, lint, tests, build)
 - **JSON-LD** `BarOrPub` con dirección, coordenadas, horarios, Instagram y `hasMap` para que Google entienda el negocio.
 - **Open Graph** para que el link se vea bien al compartirlo por WhatsApp/Instagram.
 - **Sitemap** automático, `/admin` excluido.
-- **A11y** (ya hecho): skip link, `<main>`, `alt` en fotos, `aria-label` en el menú, foco visible.
-- **Pendiente (3.6):** `prefers-reduced-motion`, contraste fino y cierre del lightbox con teclado.
+- **A11y:** skip link, `<main>`, `alt` en fotos, `aria-label` en el menú, foco visible y contraste AA.
+- **A11y (3.6):** `prefers-reduced-motion`, foco visible global, menú mobile con Escape, visores con foco controlado, diálogos con nombre accesible y `role="alert"` en los errores del panel.
 
 ---
 
@@ -173,17 +181,14 @@ git push ──┬──> GitHub Actions  (calidad: tipos, lint, tests, build)
 
 ## 4. Estado actual
 
-**Hecho:** Fase 0, Fase 1, Fase 2 y el bloque 1 de la Fase 3 (3.1, 3.2, 3.3, 3.5, 3.7, 3.9).
+**Hecho:** Fase 0, Fase 1, Fase 2 y la Fase 3 completa (3.1 a 3.9).
 
-**CI:** verde en `main` sobre el commit `87fc8e7`.
+**CI:** local verde sobre `6910e6f` (check, lint, formato, 55 tests unitarios, 11 E2E y build). Falta confirmar el run de GitHub después del push.
 
 **Dependabot:** se mergearon los 3 PR abiertos (astro 7.4.8, actions/checkout 7, actions/setup-node 7). No quedan PRs pendientes.
 
 **Pendiente:**
 
-- 3.4 — Playwright (smoke E2E).
-- 3.6 — pasada de accesibilidad.
-- 3.8 — screenshots en el README (las imágenes ya están en `docs/screenshots/`).
 - 2.5 — probar el admin en un celular real.
 - 2.6 — video de 3 minutos para el dueño.
 - Fase 4 — pitch: propuesta de 1 página, QR, antes/después, métricas, cuentas y soporte.
@@ -199,6 +204,7 @@ git push ──┬──> GitHub Actions  (calidad: tipos, lint, tests, build)
 | `npm run check`                                  | Tipos                        |
 | `npm run lint`                                   | ESLint                       |
 | `npm test`                                       | 55 tests unitarios           |
+| `npm run test:e2e`                               | 11 smoke E2E (Chromium)      |
 | `npm run format:check`                           | Verifica formato             |
 | `npm run format`                                 | Aplica formato               |
 | `npx astro dev --background` / `stop` / `status` | Manejo del dev server        |
@@ -226,3 +232,4 @@ git push ──┬──> GitHub Actions  (calidad: tipos, lint, tests, build)
 2. **TypeScript 7 mergeado sin red.** Dependabot no validó las peer dependencies. Ahora el CI lo detecta y hay un `ignore` para ese major.
 3. **Carpeta `screnshots`.** Se subió con typo al repo; se renombró a `screenshots` en un commit aparte.
 4. **`npm ci` bloqueado por VS Code.** El editor tenía tomado un binario nativo de Astro; se resolvió deteniendo el dev server.
+5. **La barra de desarrollo de Astro se colaba en los E2E.** Sus paneles agregan `<h1>` y overlays al DOM, así que Playwright encontraba más de un encabezado y se superponía al hacer clic. Se apaga con `DISABLE_DEV_TOOLBAR` solo en las pruebas, sin sacarle la herramienta al desarrollo diario.
